@@ -61,6 +61,10 @@ calculado (con motivo y bitácora), y nada se convierte entre monedas.
 | 24 | El usuario estándar es la analista; una puede ser solo consulta y otra ingresar; todo en la bitácora | Roles por empresa: **Analista** (ve e ingresa) y **Consulta** (solo ve); bitácora en todas las escrituras |
 | 27 | Almacenamiento: Vercel | Documentos y fotos de la demo en **Vercel Blob**; en la intranet, carpeta compartida |
 
+**Socios (2026-10-15).** El sistema **no** controla socios ni acciones: los socios solo interesan
+porque también están asegurados. Se retiró la tabla de relaciones persona–empresa (migración 003);
+las reglas R2 y el apartado 3.2 del requerimiento quedan fuera de alcance.
+
 **Nota sobre la 21.** Como las empresas no comparten información, la persona deja de ser una ficha
 única del grupo: cada empresa tiene sus propias fichas (`personas.id_empresa`, identificación única
 dentro de la empresa). Si la misma persona es socia de dos empresas, tiene una ficha en cada una.

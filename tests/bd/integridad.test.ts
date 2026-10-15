@@ -60,14 +60,12 @@ test("la base impide relacionar registros de dos empresas", { skip: omitir && "s
   await falla(`INSERT INTO cys.titularidades (empresa, id_vehiculo, rol, id_parte, desde, creado_por) VALUES ('b', ${v}, 'propietario_legal', ${deA}, '2025-01-01', 900)`, "23503");
 });
 
-test("titularidades y relaciones no se solapan en el tiempo; documentos van a una sola ficha", { skip: omitir && "sin DATABASE_URL_PRUEBAS" }, async () => {
+test("las titularidades no se solapan en el tiempo; documentos van a una sola ficha", { skip: omitir && "sin DATABASE_URL_PRUEBAS" }, async () => {
   const p = await parte("a", "3333333");
   const v = (await c.query("INSERT INTO cys.vehiculos (empresa, origen, placa, creado_por) VALUES ('a', 'propio', 'XY999ZZ', 900) RETURNING id")).rows[0].id;
   await c.query(`INSERT INTO cys.titularidades (empresa, id_vehiculo, rol, id_parte, desde, hasta, creado_por) VALUES ('a', ${v}, 'propietario_legal', ${p}, '2024-01-01', '2024-12-31', 900)`);
   await falla(`INSERT INTO cys.titularidades (empresa, id_vehiculo, rol, id_parte, desde, creado_por) VALUES ('a', ${v}, 'propietario_legal', ${p}, '2024-06-01', 900)`, "23P01");
   await c.query(`INSERT INTO cys.titularidades (empresa, id_vehiculo, rol, id_parte, desde, creado_por) VALUES ('a', ${v}, 'propietario_legal', ${p}, '2025-01-01', 900)`);
-  await c.query(`INSERT INTO cys.relaciones_empresa (empresa, id_parte, tipo_relacion, desde, creado_por) VALUES ('a', ${p}, 'Socio', '2020-01-01', 900)`);
-  await falla(`INSERT INTO cys.relaciones_empresa (empresa, id_parte, tipo_relacion, desde, creado_por) VALUES ('a', ${p}, 'Socio', '2023-01-01', 900)`, "23P01");
   await c.query(`INSERT INTO cys.archivos (id, empresa, almacen, clave, nombre, tipo_mime, tamano, sha256, es_imagen, subido_por) VALUES ('00000000-0000-0000-0000-000000000001', 'a', 'carpeta', 'a/x.pdf', 'x.pdf', 'application/pdf', 10, repeat('0', 64), false, 900)`);
   await falla(`INSERT INTO cys.documentos (empresa, id_archivo, tipo_documento, id_parte, id_vehiculo, creado_por) VALUES ('a', '00000000-0000-0000-0000-000000000001', 'Otro', ${p}, ${v}, 900)`, "23514");
 });

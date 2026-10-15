@@ -1,4 +1,4 @@
-# Personas y empresas (`/personas/fichas`, `/personas/socios`)
+# Personas y empresas (`/personas/fichas`)
 
 Una ficha por persona natural o jurídica **dentro de cada empresa** (tabla `cys.partes`).
 
@@ -11,9 +11,8 @@ Una ficha por persona natural o jurídica **dentro de cada empresa** (tabla `cys
   después se usan en pólizas y siniestros.
 - Datos personales (nacimiento, teléfono, correo, dirección): solo con `personas.datos_sensibles`;
   sin ese permiso se ven enmascarados y al modificar se conservan los que había.
-- Relaciones con la empresa (socio, accionista, propietario, director): con fecha de inicio y fin; la
-  base impide que la misma relación se solape en el tiempo. No se borran: se terminan.
-- Ser socio no implica estar asegurado (eso se indicará en cada póliza, Etapa 3).
+- **No** se controlan socios ni acciones (el cliente lo confirmó el 2026-10-15): los socios solo
+  interesan como asegurados, y eso se indica en cada póliza (Etapa 3).
 - Todo cambio queda en la bitácora y se ve en el «Historial» de la ficha.
 
 ## Pendiente

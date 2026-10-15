@@ -1,7 +1,6 @@
 /** Listas configurables de cys.catalogo_valores (nombre visible y para qué sirven). */
 export const LISTAS = {
   tipo_identificacion: { titulo: "Tipos de identificación", detalle: "V, E, P, J, G…" },
-  tipo_relacion: { titulo: "Relaciones con la empresa", detalle: "Socio, accionista, propietario…" },
   funcion_organizacion: { titulo: "Funciones de organizaciones", detalle: "Aseguradora, taller, transportista…" },
   tipo_vehiculo: { titulo: "Tipos de vehículo", detalle: "Automóvil, camión, chuto…" },
   color: { titulo: "Colores", detalle: "Colores de vehículos" },

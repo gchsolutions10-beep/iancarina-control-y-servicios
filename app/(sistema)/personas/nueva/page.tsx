@@ -32,7 +32,7 @@ export default async function NuevaParte({ searchParams }: PageProps<"/personas/
         {pestana("natural", "Persona natural")}
         {pestana("juridica", "Empresa / organización")}
       </nav>
-      <Seccion titulo={tipo === "natural" ? "Persona natural" : "Empresa u organización"} descripcion="Socios, propietarios, asegurados, beneficiarios, aseguradoras, talleres o transportistas.">
+      <Seccion titulo={tipo === "natural" ? "Persona natural" : "Empresa u organización"} descripcion="Asegurados, beneficiarios, propietarios, aseguradoras, talleres o transportistas.">
         <FormularioParte valores={{ tipo }} tiposId={tiposId} funciones={funciones} empresas={f.empresasRegistrar} verSensibles={verSensibles} />
       </Seccion>
     </main>

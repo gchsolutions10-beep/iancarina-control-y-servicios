@@ -38,7 +38,8 @@ administrador).
    Para `SESSION_SECRET` usa un generador de contraseñas de 64 caracteres, o en cualquier terminal:
    `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`.
    **Documentos y fotos:** Vercel → **Storage → Create → Blob**, acceso **Private**, y conéctalo al
-   proyecto: Vercel crea `BLOB_READ_WRITE_TOKEN` solo. Vuelve a desplegar después de conectarlo.
+   proyecto: Vercel crea `BLOB_STORE_ID` solo (la credencial la da Vercel; en tiendas antiguas,
+   `BLOB_READ_WRITE_TOKEN`). Usa una tienda **propia de este proyecto** y vuelve a desplegar.
    Sin ese almacenamiento el sistema funciona, pero avisa que la carga de archivos no está configurada.
 5. **Deploy**. En el registro del build debes ver:
    `→ Aplicando 001_sistema_base.sql` · `✓ Base de datos al día` · `✓ Administrador inicial «…» creado`.
