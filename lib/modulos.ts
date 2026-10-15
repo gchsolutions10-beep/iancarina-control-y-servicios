@@ -52,8 +52,8 @@ export const AREAS: Area[] = [
       {
         nombre: "Personas",
         modulos: [
-          { id: "personas", nombre: "Fichas de personas", descripcion: "Socios, propietarios, asegurados y beneficiarios, con su historial", icono: Users, permiso: "seguros.ver", origen: "cys.personas" },
-          { id: "relaciones-empresa", nombre: "Socios y propietarios", descripcion: "Relación de cada persona con las empresas, con fechas", icono: Handshake, permiso: "seguros.ver", origen: "cys.persona_empresa_relaciones" },
+          { id: "personas", nombre: "Fichas de personas", descripcion: "Socios, propietarios, asegurados y beneficiarios, con su historial", icono: Users, permiso: "seguros.ver", origen: "cys.personas", ruta: "/personas/fichas" },
+          { id: "relaciones-empresa", nombre: "Socios y propietarios", descripcion: "Relación de cada persona con las empresas, con fechas", icono: Handshake, permiso: "seguros.ver", origen: "cys.persona_empresa_relaciones", ruta: "/personas/socios" },
         ],
       },
     ],
@@ -66,8 +66,8 @@ export const AREAS: Area[] = [
       {
         nombre: "Activos asegurables",
         modulos: [
-          { id: "vehiculos", nombre: "Vehículos", descripcion: "Flota propia y de terceros: ficha, propietario, fotos y documentos", icono: Car, permiso: "seguros.ver", origen: "cys.vehiculos" },
-          { id: "propiedades", nombre: "Propiedades", descripcion: "Casas, edificios e instalaciones asegurables", icono: Building, permiso: "seguros.ver", origen: "cys.propiedades" },
+          { id: "vehiculos", nombre: "Vehículos", descripcion: "Flota propia y de terceros: ficha, propietario, fotos y documentos", icono: Car, permiso: "seguros.ver", origen: "cys.vehiculos", ruta: "/activos/vehiculos" },
+          { id: "propiedades", nombre: "Propiedades", descripcion: "Casas, edificios e instalaciones asegurables", icono: Building, permiso: "seguros.ver", origen: "cys.propiedades", ruta: "/activos/propiedades" },
         ],
       },
     ],

@@ -37,8 +37,9 @@ administrador).
 
    Para `SESSION_SECRET` usa un generador de contraseñas de 64 caracteres, o en cualquier terminal:
    `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`.
-   Cuando se agreguen documentos y fotos (Etapa 2) se sumará `BLOB_READ_WRITE_TOKEN`
-   (Vercel → Storage → Blob, se llena solo).
+   **Documentos y fotos:** Vercel → **Storage → Create → Blob**, acceso **Private**, y conéctalo al
+   proyecto: Vercel crea `BLOB_READ_WRITE_TOKEN` solo. Vuelve a desplegar después de conectarlo.
+   Sin ese almacenamiento el sistema funciona, pero avisa que la carga de archivos no está configurada.
 5. **Deploy**. En el registro del build debes ver:
    `→ Aplicando 001_sistema_base.sql` · `✓ Base de datos al día` · `✓ Administrador inicial «…» creado`.
 6. Entra a la URL de Vercel con el administrador. Después del primer ingreso puedes borrar
@@ -60,4 +61,6 @@ aislarlas, crea en Neon una rama `pruebas` y pon su cadena en las variables de *
 ## 5. Producción en la intranet (Etapa 6)
 
 Node 22 LTS, PostgreSQL del cliente, `npm ci && npm run db:migrar && npm run build && npm start`,
-mismas variables (sin `PREPARAR_DEMO`; `SESSION_COOKIE_SECURE=false` si no hay HTTPS).
+mismas variables (sin `PREPARAR_DEMO`; `SESSION_COOKIE_SECURE=false` si no hay HTTPS), más
+`ALMACEN=carpeta` y `ARCHIVOS_RUTA_BASE` (carpeta compartida montada en el servidor, con permiso de
+lectura y escritura para el usuario del servicio).

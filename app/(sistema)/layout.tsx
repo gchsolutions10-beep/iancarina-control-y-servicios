@@ -21,7 +21,12 @@ export default async function LayoutSistema({ children }: LayoutProps<"/">) {
     // Una pestaña por área, solo las que el usuario tiene habilitadas.
     ...areasVisibles(usuario).map((a) => ({ href: `/${a.id}`, etiqueta: a.pestana })),
     ...(puedeGestionarUsuarios(comoGestor(usuario)) ? [{ href: "/admin/usuarios", etiqueta: "Usuarios" }] : []),
-    ...(tienePermiso(usuario, "admin.sistema") ? [{ href: "/admin/empresas", etiqueta: "Empresas" }] : []),
+    ...(tienePermiso(usuario, "admin.sistema")
+      ? [
+          { href: "/admin/empresas", etiqueta: "Empresas" },
+          { href: "/admin/catalogos", etiqueta: "Catálogos" },
+        ]
+      : []),
     ...(tienePermiso(usuario, "admin.sistema") || tienePermiso(usuario, "sistema.desarrollador") ? [{ href: "/ajustes", etiqueta: "Ajustes" }] : []),
   ];
 

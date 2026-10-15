@@ -5,13 +5,34 @@ import { ahoraPlanta } from "@/lib/tiempo";
 
 type Cliente = typeof db | Prisma.TransactionClient;
 
+/** Datos estructurados de la operación (para el historial de cada ficha). */
+export type DetalleBitacora = {
+  empresa?: string;
+  /** Tabla o entidad afectada: partes, vehiculos, propiedades… */
+  entidad?: string;
+  idRegistro?: string | number | bigint;
+  /** CREAR, MODIFICAR, BAJA, TITULAR, DOCUMENTO, CONSULTA… */
+  operacion?: string;
+  motivo?: string | null;
+};
+
 /**
- * Escribe en la bitácora de la web cys.app_bitacora (mismo formato que tgesth de Access).
+ * Escribe en la bitácora de la web cys.app_bitacora (texto legible + datos estructurados).
  * Dentro de una transacción, pasa el cliente `tx` para que se confirme junto al cambio.
  */
-export async function registrarGestion(idUsuario: number | null, modulo: string, descripcion: string, cliente: Cliente = db) {
+export async function registrarGestion(idUsuario: number | null, modulo: string, descripcion: string, cliente: Cliente = db, detalle: DetalleBitacora = {}) {
   await cliente.app_bitacora.create({
-    data: { id_usuario_gestion: idUsuario, fecha_gestion: ahoraPlanta(), modulo, descripcion },
+    data: {
+      id_usuario_gestion: idUsuario,
+      fecha_gestion: ahoraPlanta(),
+      modulo,
+      descripcion,
+      empresa: detalle.empresa ?? null,
+      entidad: detalle.entidad ?? null,
+      id_registro: detalle.idRegistro === undefined ? null : String(detalle.idRegistro),
+      operacion: detalle.operacion ?? null,
+      motivo: detalle.motivo ?? null,
+    },
   });
 }
 
