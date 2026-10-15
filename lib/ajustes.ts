@@ -30,6 +30,15 @@ export const AJUSTES = {
     esquema: z.coerce.number().int().min(1).max(365),
     defecto: 30,
   },
+  "archivos.tamano_maximo_mb": {
+    grupo: "Archivos",
+    titulo: "Tamaño máximo por archivo (MB)",
+    detalle: "Documentos y fotos. En la demo (Vercel) no puede pasar de 4 MB.",
+    tipo: "numero",
+    editor: "admin.sistema",
+    esquema: z.coerce.number().int().min(1).max(50),
+    defecto: 4,
+  },
 } satisfies Record<string, Definicion>;
 
 export type ClaveAjuste = keyof typeof AJUSTES;

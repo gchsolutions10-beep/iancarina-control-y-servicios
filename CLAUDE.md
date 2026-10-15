@@ -59,7 +59,11 @@ del sistema (login, usuarios, ajustes, componentes) se copió de ahí y ya no se
   propuesta base de mercado (`docs/REGLAS-Y-PENDIENTES.md` §2, autorizada por GCH), cargada como reglas
   configurables marcadas «Propuesta». Si falta un parámetro, el cálculo queda como simulación y la
   confirmación financiera se bloquea con un mensaje que dice qué falta.
-- Toda escritura: sesión → permiso **en la empresa** del registro → Zod → transacción con bitácora.
+- Toda escritura: sesión → permiso **en la empresa** del registro → Zod → transacción con bitácora
+  (`registrarGestion(..., { empresa, entidad, idRegistro, operacion })` alimenta el «Historial» de cada ficha).
+- Formularios: `components/formularios/formulario-accion.tsx` (errores por campo, no reinicia lo escrito).
+- Archivos: `guardarArchivo()` y `/archivos/<id>`; nunca rutas del navegador ni contenido en la base.
+- Pruebas: `npm test` (lógica) y `npm run test:bd` (base nueva + restricciones; `DATABASE_URL_PRUEBAS`).
 - Ante una duda de negocio, **preguntar antes** de construir.
 
 ## Estado del proyecto
@@ -67,7 +71,9 @@ del sistema (login, usuarios, ajustes, componentes) se copió de ahí y ya no se
 - [x] Etapa 1: auditoría y diseño (`docs/PLAN.md`, `docs/MODELO-DATOS.md`, `docs/REGLAS-Y-PENDIENTES.md`)
 - [x] Base del sistema: login, empresas, usuarios con rol por empresa (analista/consulta), ajustes,
       menú por áreas, bitácora inmutable, tema, despliegue en Vercel + Neon (`docs/DESPLIEGUE.md`)
-- [ ] Etapa 2: personas, relaciones, vehículos, propiedades, catálogos, documentos y fotos (Vercel Blob / carpeta)
+- [x] Etapa 2: personas y empresas (`docs/modulos/personas.md`), socios, vehículos y propiedades con
+      titulares y bajas, documentos y fotos en Blob privado / carpeta (`docs/modulos/activos.md`), catálogos
+- [ ] Etapa 2b: consolidar personas duplicadas (fusión) — cuando haya pólizas que reapuntar
 - [ ] Etapa 3: pólizas, motor de cálculo, renovaciones, altas/bajas, núcleo financiero de primas
 - [ ] Etapa 4: siniestros
 - [ ] Etapa 5: finanzas completas, indicadores y reportes

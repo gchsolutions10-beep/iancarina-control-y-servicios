@@ -18,6 +18,12 @@ Esquema PostgreSQL: `cys` (nombre por confirmar). Tablas del sistema base con pr
 | D9 | **Archivos fuera de la base**: la BD guarda metadatos y una clave de almacenamiento generada por el servidor; el contenido va a carpeta compartida (intranet) o almacenamiento de objetos (demo). | Requisito explícito; mismo código con dos adaptadores. |
 | D10 | **Bitácora append-only** estructurada (`app_bitacora`: operación, entidad, id, cambios `jsonb`, motivo) además del texto legible estilo `tgesth`. | Auditoría consultable por registro; nadie puede editarla (disparador que impide UPDATE/DELETE). |
 
+> **Implementado en la Etapa 2 (migración 002):** D1 se simplificó a **una sola tabla `partes`**
+> (naturales y jurídicas) con restricciones `CHECK` por tipo, en vez de tres tablas: misma
+> integridad (una sola llave foránea para todos los roles), menos uniones. Todas las tablas llevan
+> `empresa` y llaves compuestas `(empresa, id)`; las organizaciones (aseguradoras, talleres…) son
+> partes jurídicas con `funciones`. Catálogos simples en `catalogo_valores`; marcas y modelos aparte.
+
 ## 2. Diagrama general
 
 ```mermaid
