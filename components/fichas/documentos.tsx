@@ -79,6 +79,7 @@ export function SeccionDocumentos({ ficha, documentos, puedeRegistrar, puedeConf
               {puedeConfidencial && <Casilla nombre="confidencial" etiqueta="Confidencial (solo lo ven quienes tienen acceso a datos personales)" />}
             </FormularioAccion>
           </details>
+          {ficha.tipo !== "poliza" && (
           <details className="rounded-lg border border-borde p-4">
             <summary className="flex cursor-pointer items-center gap-2 text-sm font-medium text-tinta">
               <ImageIcon className="size-4" aria-hidden /> Agregar foto principal
@@ -88,6 +89,7 @@ export function SeccionDocumentos({ ficha, documentos, puedeRegistrar, puedeConf
               <Entrada nombre="descripcion" etiqueta="Descripción" />
             </FormularioAccion>
           </details>
+          )}
         </div>
       )}
     </Seccion>

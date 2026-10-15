@@ -11,19 +11,20 @@ import { ENTIDAD_FICHA, type Ficha } from "@/lib/fichas/datos";
 import { textoOpcional } from "@/lib/validations/comunes";
 
 const texto = (fd: FormData, campo: string) => String(fd.get(campo) ?? "");
-const RUTA: Record<Ficha["tipo"], string> = { parte: "/personas", vehiculo: "/activos/vehiculos", propiedad: "/activos/propiedades" };
-const COLUMNA = { parte: "id_parte", vehiculo: "id_vehiculo", propiedad: "id_propiedad" } as const;
+const RUTA: Record<Ficha["tipo"], string> = { parte: "/personas", vehiculo: "/activos/vehiculos", propiedad: "/activos/propiedades", poliza: "/polizas" };
+const COLUMNA = { parte: "id_parte", vehiculo: "id_vehiculo", propiedad: "id_propiedad", poliza: "id_poliza" } as const;
 
 async function empresaDeFicha(f: Ficha): Promise<string | null> {
   const where = { where: { id: BigInt(f.id) }, select: { empresa: true } };
-  const fila = f.tipo === "parte" ? await db.partes.findUnique(where) : f.tipo === "vehiculo" ? await db.vehiculos.findUnique(where) : await db.propiedades.findUnique(where);
+  const fila =
+    f.tipo === "parte" ? await db.partes.findUnique(where) : f.tipo === "vehiculo" ? await db.vehiculos.findUnique(where) : f.tipo === "poliza" ? await db.polizas.findUnique(where) : await db.propiedades.findUnique(where);
   return fila?.empresa ?? null;
 }
 
 function leerFicha(fd: FormData): Ficha | null {
   const tipo = texto(fd, "ficha");
   const id = Number(texto(fd, "id_ficha"));
-  if ((tipo === "parte" || tipo === "vehiculo" || tipo === "propiedad") && Number.isInteger(id) && id > 0) return { tipo, id };
+  if ((tipo === "parte" || tipo === "vehiculo" || tipo === "propiedad" || tipo === "poliza") && Number.isInteger(id) && id > 0) return { tipo, id };
   return null;
 }
 
@@ -39,7 +40,7 @@ export async function subirDocumento(_previo: EstadoAccion, fd: FormData): Promi
 
   const archivo = fd.get("archivo");
   if (!(archivo instanceof File) || archivo.size === 0) return { error: "Elige un archivo.", errores: { archivo: "Elige un archivo" } };
-  const esFoto = texto(fd, "foto") === "1";
+  const esFoto = texto(fd, "foto") === "1" && ficha.tipo !== "poliza";
   const tipoDocumento = esFoto ? "Fotografía" : texto(fd, "tipo_documento").trim();
   if (!tipoDocumento) return { error: "Elige el tipo de documento.", errores: { tipo_documento: "Elige el tipo" } };
   const descripcion = textoOpcional(500).parse(texto(fd, "descripcion"));
@@ -67,7 +68,7 @@ export async function subirDocumento(_previo: EstadoAccion, fd: FormData): Promi
       const data = { id_foto: guardado.id };
       if (ficha.tipo === "parte") await tx.partes.update({ where: { id: BigInt(ficha.id) }, data });
       else if (ficha.tipo === "vehiculo") await tx.vehiculos.update({ where: { id: BigInt(ficha.id) }, data });
-      else await tx.propiedades.update({ where: { id: BigInt(ficha.id) }, data });
+      else if (ficha.tipo === "propiedad") await tx.propiedades.update({ where: { id: BigInt(ficha.id) }, data });
     }
     await registrarGestion(usuario.id, "DOCUMENTOS", `ID ${ficha.id} | DOCUMENTO ${doc.id}: ${tipoDocumento} «${archivo.name}»${esFoto ? " (foto principal)" : ""}${confidencial ? " [confidencial]" : ""}`, tx, {
       empresa,
@@ -87,7 +88,13 @@ export async function retirarDocumento(_previo: EstadoAccion, fd: FormData): Pro
   if (!doc || doc.retirado) return { error: "El documento ya no está." };
   const negado = sinPermiso(usuario, doc.empresa, "seguros.registrar");
   if (negado) return { error: negado };
-  const ficha: Ficha = doc.id_parte ? { tipo: "parte", id: Number(doc.id_parte) } : doc.id_vehiculo ? { tipo: "vehiculo", id: Number(doc.id_vehiculo) } : { tipo: "propiedad", id: Number(doc.id_propiedad) };
+  const ficha: Ficha = doc.id_parte
+    ? { tipo: "parte", id: Number(doc.id_parte) }
+    : doc.id_vehiculo
+      ? { tipo: "vehiculo", id: Number(doc.id_vehiculo) }
+      : doc.id_poliza
+        ? { tipo: "poliza", id: Number(doc.id_poliza) }
+        : { tipo: "propiedad", id: Number(doc.id_propiedad) };
   const motivo = texto(fd, "motivo").trim();
   if (motivo.length < 3) return { error: "Indica el motivo para retirar el documento." };
   await db.$transaction(async (tx) => {

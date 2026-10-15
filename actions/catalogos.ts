@@ -29,6 +29,21 @@ export async function agregarCatalogo(_previo: EstadoAccion, fd: FormData): Prom
       const idMarca = Number(texto(fd, "id_marca"));
       if (!Number.isInteger(idMarca) || idMarca <= 0) return { errores: { id_marca: "Elige la marca" } };
       await db.modelos.create({ data: { id_marca: idMarca, nombre: nombre.toUpperCase() } });
+    } else if (que === "ramo") {
+      const sujeto = texto(fd, "sujeto");
+      if (!["vehiculo", "persona", "propiedad"].includes(sujeto)) return { errores: { sujeto: "Elige qué se asegura" } };
+      await db.ramos.create({ data: { nombre, sujeto } });
+    } else if (que === "cobertura") {
+      const idRamo = Number(texto(fd, "id_ramo"));
+      if (!Number.isInteger(idRamo) || idRamo <= 0) return { errores: { id_ramo: "Elige el ramo" } };
+      const idPadre = Number(texto(fd, "id_padre")) || null;
+      const incluida = fd.get("incluida_en_padre") === "on";
+      if (incluida && !idPadre) return { errores: { id_padre: "Elige en qué cobertura está incluida" } };
+      if (idPadre) {
+        const padre = await db.coberturas.findUnique({ where: { id: idPadre } });
+        if (padre?.id_ramo !== idRamo) return { errores: { id_padre: "Debe ser del mismo ramo" } };
+      }
+      await db.coberturas.create({ data: { id_ramo: idRamo, nombre, id_padre: idPadre, incluida_en_padre: incluida, orden: 50 } });
     } else if (esLista(que)) await db.catalogo_valores.create({ data: { lista: que, nombre, orden: 50 } });
     else return { error: "Catálogo no válido." };
   } catch (error) {
@@ -49,6 +64,8 @@ export async function alternarCatalogo(_previo: EstadoAccion, fd: FormData): Pro
   const activo = texto(fd, "activo") === "1";
   if (que === "marca") await db.marcas.update({ where: { id }, data: { activo } });
   else if (que === "modelo") await db.modelos.update({ where: { id }, data: { activo } });
+  else if (que === "ramo") await db.ramos.update({ where: { id }, data: { activo } });
+  else if (que === "cobertura") await db.coberturas.update({ where: { id }, data: { activo } });
   else await db.catalogo_valores.update({ where: { id }, data: { activo } });
   await registrarGestion(u.id, "CATALOGOS", `${que.toUpperCase()} ${id}: ${activo ? "ACTIVADO" : "DESACTIVADO"}`);
   revalidatePath(RUTA);

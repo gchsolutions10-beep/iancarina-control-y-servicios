@@ -15,13 +15,14 @@
     "usuario:soporte": "tsx scripts/usuario-soporte.ts",
     "postinstall": "prisma generate",
     "test": "node --import tsx --test tests/*.test.ts",
-    "test:bd": "node --import tsx --test tests/bd/*.test.ts"
+    "test:bd": "node --import tsx --test --test-concurrency=1 tests/bd/*.test.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "@vercel/blob": "^2.8.2",
     "bcryptjs": "^3.0.3",
+    "decimal.js": "^10.6.0",
     "geist": "^1.7.2",
     "jose": "^6.2.12",
     "lucide-react": "^1.52.0",

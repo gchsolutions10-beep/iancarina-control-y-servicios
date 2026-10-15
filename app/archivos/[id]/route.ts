@@ -13,7 +13,7 @@ export async function GET(request: Request, { params }: RouteContext<"/archivos/
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/.test(id)) return new Response("No encontrado", { status: 404 });
 
-  const archivo = await db.archivos.findUnique({ where: { id }, include: { documentos: { select: { id: true, confidencial: true, id_parte: true, id_vehiculo: true, id_propiedad: true } } } });
+  const archivo = await db.archivos.findUnique({ where: { id }, include: { documentos: { select: { id: true, confidencial: true, id_parte: true, id_vehiculo: true, id_propiedad: true, id_poliza: true } } } });
   // Mismo «no encontrado» si no existe o si no tiene acceso: no revela qué hay en otras empresas.
   if (!archivo || !tienePermiso(usuario, "seguros.ver", archivo.empresa)) return new Response("No encontrado", { status: 404 });
   const confidencial = archivo.documentos.some((d) => d.confidencial);
@@ -24,7 +24,7 @@ export async function GET(request: Request, { params }: RouteContext<"/archivos/
 
   const doc = archivo.documentos[0];
   if (doc && !archivo.es_imagen) {
-    const [entidad, idRegistro] = doc.id_parte ? ["partes", doc.id_parte] : doc.id_vehiculo ? ["vehiculos", doc.id_vehiculo] : ["propiedades", doc.id_propiedad];
+    const [entidad, idRegistro] = doc.id_parte ? ["partes", doc.id_parte] : doc.id_vehiculo ? ["vehiculos", doc.id_vehiculo] : doc.id_poliza ? ["polizas", doc.id_poliza] : ["propiedades", doc.id_propiedad];
     await registrarGestion(usuario.id, "DOCUMENTOS", `ID ${idRegistro} | DOCUMENTO ${doc.id} ABIERTO «${archivo.nombre}»`, undefined, {
       empresa: archivo.empresa,
       entidad: entidad as string,

@@ -25,6 +25,7 @@ export default async function LayoutSistema({ children }: LayoutProps<"/">) {
       ? [
           { href: "/admin/empresas", etiqueta: "Empresas" },
           { href: "/admin/catalogos", etiqueta: "Catálogos" },
+          { href: "/admin/reglas", etiqueta: "Reglas" },
         ]
       : []),
     ...(tienePermiso(usuario, "admin.sistema") || tienePermiso(usuario, "sistema.desarrollador") ? [{ href: "/ajustes", etiqueta: "Ajustes" }] : []),
