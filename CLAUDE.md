@@ -1,16 +1,15 @@
 @AGENTS.md
 
-# Control de Seguros y Activos — <CLIENTE por confirmar: ¿Mary Iancarina, C.A.?>
+# Control de Seguros y Activos — Mary Iancarina, C.A.
 
 Sistema web para centralizar personas (socios, propietarios, asegurados), vehículos, propiedades,
 pólizas con sus vigencias, certificados y coberturas, renovaciones, siniestros, pagos de primas y
 cuentas por cobrar a las aseguradoras, con indicadores y reportes.
-**No reemplaza una aplicación de Access** (por confirmar: hoy se lleva en Excel). La base es nueva:
-PostgreSQL propio (Neon para la demo, servidor del cliente en producción).
-Mismo stack, método y estilo que `iancarina-planta-maiz` e `iancarina-dpto-legal` (proyectos modelo,
-solo de referencia: no se modifican desde este proyecto).
+Sistema **nuevo** (no reemplaza Access). Base PostgreSQL propia: Neon para la demo, servidor del
+cliente en producción. Mismo método y estilo que los proyectos de GCH para Mary Iancarina; la base
+del sistema (login, usuarios, ajustes, componentes) se copió de ahí y ya no se necesitan esos repos.
 
-- Cliente y protagonista visual: **<CLIENTE>**. Logo oficial en `public/marca/`.
+- Cliente y protagonista visual: **Mary Iancarina, C.A.** Logo oficial en `public/marca/`.
 - Desarrollado por **GCH Solutions**: solo crédito discreto en el pie.
 - Idioma de la interfaz y del código de dominio: **español**.
 
@@ -29,7 +28,7 @@ solo de referencia: no se modifican desde este proyecto).
 
 ## Base de datos
 
-- Esquema **`cys`** (por confirmar el nombre). Tablas del sistema base con prefijo `app_`; tablas del
+- Esquema **`cys`**. Tablas del sistema base con prefijo `app_`; tablas del
   dominio sin prefijo. Migraciones SQL versionadas en `db/migraciones/NNN_*.sql` + `.rollback.sql`.
 - Llaves foráneas reales desde el primer día (la base es nueva). Nada de relaciones polimórficas
   «tipo + id»: se usan columnas de llave excluyentes con `CHECK (num_nonnulls(...) = 1)`.
@@ -38,6 +37,17 @@ solo de referencia: no se modifican desde este proyecto).
 - Importes `numeric(18,2)` (tasas `numeric(18,8)`) y siempre con su moneda; nunca se convierten
   monedas solas.
 
+## Usuarios y permisos
+
+- Empresas en `cys.app_empresas` (Administración → Empresas). **Se manejan por separado**: cada usuario
+  ve solo las empresas donde tiene rol y toda consulta filtra por ellas.
+- Roles por empresa: **Analista** (ve e ingresa) y **Consulta** (solo ve), con `vigente_hasta`
+  opcional. Excepciones por empresa: gestionar usuarios, ver datos personales, anular y ajustar.
+- Roles globales: administrador (todo) y desarrollador (solo `npm run usuario:soporte`).
+- Permisos en `lib/auth/permisos.ts` ⇄ `cys.app_permisos`: `requerirPermiso("seguros.registrar", empresa)`.
+- Bitácora `cys.app_bitacora` (no se edita ni se borra; disparador). Nunca se borran usuarios ni empresas.
+- Primer administrador: variables `ADMIN_INICIAL_*` en el despliegue (`docs/DESPLIEGUE.md`).
+
 ## Reglas transversales
 
 - Commits y pull requests **sin** líneas de atribución (nada de «Co-Authored-By», «Claude-Session» ni
@@ -45,20 +55,27 @@ solo de referencia: no se modifican desde este proyecto).
   limpio sin `CLAUDE.md`, `AGENTS.md` ni `.claude/`.
 - Datos reales del cliente solo en su servidor. Vercel/Neon y el desarrollo usan datos sintéticos
   marcados como tales (`db/semillas/demo.sql`). Nunca se suben respaldos con datos.
-- **No se inventan** importes, coberturas, fórmulas, tasas, límites ni beneficiarios: todo se configura.
-  Si falta una regla obligatoria, el cálculo queda como simulación y la confirmación financiera se bloquea
-  con un mensaje que dice qué falta.
+- **No se inventan** importes, coberturas ni beneficiarios. Las tasas, fórmulas y prorrateos parten de la
+  propuesta base de mercado (`docs/REGLAS-Y-PENDIENTES.md` §2, autorizada por GCH), cargada como reglas
+  configurables marcadas «Propuesta». Si falta un parámetro, el cálculo queda como simulación y la
+  confirmación financiera se bloquea con un mensaje que dice qué falta.
 - Toda escritura: sesión → permiso **en la empresa** del registro → Zod → transacción con bitácora.
 - Ante una duda de negocio, **preguntar antes** de construir.
 
 ## Estado del proyecto
 
 - [x] Etapa 1: auditoría y diseño (`docs/PLAN.md`, `docs/MODELO-DATOS.md`, `docs/REGLAS-Y-PENDIENTES.md`)
-- [ ] Etapa 2: núcleo (base del sistema, empresas, personas, relaciones, vehículos, propiedades, catálogos, documentos, auditoría)
+- [x] Base del sistema: login, empresas, usuarios con rol por empresa (analista/consulta), ajustes,
+      menú por áreas, bitácora inmutable, tema, despliegue en Vercel + Neon (`docs/DESPLIEGUE.md`)
+- [ ] Etapa 2: personas, relaciones, vehículos, propiedades, catálogos, documentos y fotos (Vercel Blob / carpeta)
 - [ ] Etapa 3: pólizas, motor de cálculo, renovaciones, altas/bajas, núcleo financiero de primas
 - [ ] Etapa 4: siniestros
 - [ ] Etapa 5: finanzas completas, indicadores y reportes
 - [ ] Etapa 6: despliegue dual e instalación
+
+## Flujo de publicación
+
+- Cada entrega: rama de trabajo → PR a `main` → merge (Vercel publica la demo y migra Neon solo).
 
 ## Pendiente de confirmar con el cliente
 

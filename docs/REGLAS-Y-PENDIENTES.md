@@ -25,9 +25,50 @@
 | R19 | Archivos: tipo validado por contenido, acceso solo por la aplicación, nunca en tablas de PostgreSQL. | `archivos`, adaptadores de almacenamiento |
 | R20 | Datos sintéticos claramente marcados en la demo; nunca cifras ficticias como resultados reales. | Semilla de demo con prefijo «DEMO» |
 
-## 2. Preguntas para el cliente
+## 2. Propuesta base de cálculo (práctica habitual de las aseguradoras)
 
-Las 1–17 vienen del requerimiento; las 18–30 salieron de la auditoría. Mientras no haya respuesta,
+GCH autorizó (2026-10-15) proponer reglas según la práctica del mercado, porque el cliente quiere
+una propuesta y luego ajustará. Se cargan como **reglas configurables marcadas «Propuesta»**: el
+sistema muestra la regla usada en cada cálculo y cualquiera se reemplaza por la del contrato real sin
+tocar código. Lo ya calculado conserva la versión con que se calculó.
+
+| Tema | Propuesta |
+|---|---|
+| Suma asegurada del vehículo | Valor del vehículo + aditamentos/blindaje declarados |
+| Casco (pérdida total / cobertura amplia) | Prima anual = suma asegurada × tasa anual (en %) |
+| RCV | Prima fija anual por tipo de vehículo (tarifa por clase), sin tasa |
+| Exceso de límite, defensa penal, APOV, asistencia vial | Prima fija anual por vehículo, cada una aparte; cuentan una sola vez en el total |
+| Unidad de las tasas | Porcentaje anual (2,5 % = 2,5); se puede cambiar a «por mil» por regla |
+| Redondeo | 2 decimales, mitad hacia arriba, por cobertura; el total es la suma de las coberturas redondeadas |
+| Alta durante la vigencia | Prorrata por días: prima anual × días desde la fecha efectiva hasta el fin ÷ 365 |
+| Baja por venta o retiro | Devolución a prorrata por días restantes ÷ 365 |
+| Cancelación total pedida por el asegurado | Tabla de corto plazo (configurable por aseguradora; queda vacía hasta cargarla) |
+| Elegibilidad en la renovación | Se excluye el vehículo con fecha de venta anterior al inicio de la nueva vigencia |
+| Riesgos diversos | Límite anual agregado + límite por vehículo; consume el **monto reconocido**; aviso al superar 80 % y bloqueo al 100 % |
+| Tasa promedio | Ponderada: Σ primas ÷ Σ sumas aseguradas |
+
+Siguen valiendo dos reglas: el importe confirmado por la aseguradora siempre puede reemplazar al
+calculado (con motivo y bitácora), y nada se convierte entre monedas.
+
+## 3. Respuestas del cliente (2026-10-15)
+
+| # | Respuesta | Efecto en el diseño |
+|---|---|---|
+| 18 | Sistema nuevo, sin datos previos de Access | Base nueva con llaves reales; sin cargador de Access |
+| 19 | Cliente: Mary Iancarina | Marca y colores de Mary Iancarina |
+| 20 | No hay pólizas que cubran varias filiales | Toda póliza, activo y siniestro pertenece a **una** empresa; las relaciones se validan dentro de la misma empresa |
+| 21 | Las empresas se manejan por separado | Nadie ve personas ni datos de otra empresa (ni siquiera «ya existe»). Las fichas de personas pasan a ser **por empresa** (ver nota) |
+| 24 | El usuario estándar es la analista; una puede ser solo consulta y otra ingresar; todo en la bitácora | Roles por empresa: **Analista** (ve e ingresa) y **Consulta** (solo ve); bitácora en todas las escrituras |
+| 27 | Almacenamiento: Vercel | Documentos y fotos de la demo en **Vercel Blob**; en la intranet, carpeta compartida |
+
+**Nota sobre la 21.** Como las empresas no comparten información, la persona deja de ser una ficha
+única del grupo: cada empresa tiene sus propias fichas (`personas.id_empresa`, identificación única
+dentro de la empresa). Si la misma persona es socia de dos empresas, tiene una ficha en cada una.
+Dentro de cada empresa sigue valiendo «una persona, una ficha» con varios roles.
+
+## 4. Preguntas para el cliente
+
+Las respondidas están tachadas (ver §3). Las 3–8 tienen propuesta base (§2). Las 1–17 vienen del requerimiento; las 18–30 salieron de la auditoría. Mientras no haya respuesta,
 el sistema deja la regla configurable y bloquea la confirmación que dependa de ella.
 
 **Vehículos y cálculos**
@@ -54,16 +95,16 @@ el sistema deja la regla configurable y bloquea la confirmación que dependa de 
 17. **Monedas** en uso (USD, Bs., EUR) y si alguna vez se necesita mostrar equivalencias (con qué tasa y fuente).
 
 **Surgidas en la auditoría**
-18. ¿Existe hoy un sistema (Access, Excel u otro) del que haya que **migrar datos**? Si es Access, aplica el método completo de GCH; si es Excel, se hace un cargador con validación.
-19. **Cliente y marca**: ¿el sistema es de Mary Iancarina, C.A. (mismo logo y rojo `#e72a18`) o de otra empresa del grupo? ¿Nombre del sistema y del departamento que lo usa?
-20. **Empresas y filiales** iniciales. ¿Hay pólizas corporativas que cubren bienes o personas de **varias filiales** (una póliza, cargo por empresa/CECO)?
-21. **Visibilidad de personas entre empresas**: un usuario de la filial A, ¿puede saber que una persona ya está registrada por la filial B? ¿Qué parte de su ficha puede ver?
+~~18. ¿Existe hoy un sistema (Access, Excel u otro) del que haya que **migrar datos**? Si es Access, aplica el método completo de GCH; si es Excel, se hace un cargador con validación.~~ (respondida)
+~~19. **Cliente y marca**: ¿el sistema es de Mary Iancarina, C.A. (mismo logo y rojo `#e72a18`) o de otra empresa del grupo? ¿Nombre del sistema y del departamento que lo usa?~~ (respondida)
+~~20. **Empresas y filiales** iniciales. ¿Hay pólizas corporativas que cubren bienes o personas de **varias filiales** (una póliza, cargo por empresa/CECO)?~~ (respondida)
+~~21. **Visibilidad de personas entre empresas**: un usuario de la filial A, ¿puede saber que una persona ya está registrada por la filial B? ¿Qué parte de su ficha puede ver?~~ (respondida)
 22. **Identificación de vehículos**: ¿la placa es única y estable, o hace falta serial de carrocería/motor? (no se agrega ningún campo sin confirmar)
 23. ¿El **número de póliza** es único por aseguradora? ¿Cómo se numeran los **expedientes** de siniestro (formato, por empresa, por año)?
-24. **Usuario estándar**: ¿qué puede ver y hacer (registrar pólizas, pagos, siniestros)? ¿Quién ve datos personales y siniestros de personas?
+~~24. **Usuario estándar**: ¿qué puede ver y hacer (registrar pólizas, pagos, siniestros)? ¿Quién ve datos personales y siniestros de personas?~~ (respondida)
 25. ¿Quién **autoriza** anulaciones, ajustes de cálculo y ventas retroactivas? ¿Hace falta doble aprobación?
 26. ¿Hay **corredor** en todas las pólizas? ¿Se registran comisiones? (no incluido hasta confirmar)
-27. **Demo**: ¿qué almacenamiento en la nube se usa para documentos (Vercel Blob, Cloudflare R2, Amazon S3)? ¿Tamaño máximo por archivo?
+~~27. **Demo**: ¿qué almacenamiento en la nube se usa para documentos (Vercel Blob, Cloudflare R2, Amazon S3)? ¿Tamaño máximo por archivo?~~ (respondida)
 28. ¿Hace falta **aviso** de vencimientos (pólizas por vencer, expedientes sin movimiento, cuentas por cobrar vencidas)? ¿Con cuántos días?
 29. ¿Algún requisito legal de **protección de datos** o de conservación de documentos que debamos cumplir?
 30. Las etapas de siniestros de **personas y propiedades**: ¿usan el mismo flujo de vehículos o uno propio?

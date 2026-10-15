@@ -1,0 +1,5 @@
+# Migraciones y SQL siempre con LF (checksums de migraciones y Neon)
+*.sql text eol=lf
+# Scripts de Windows: se guardan tal cual (CRLF y codificación propias)
+*.ps1 -text
+*.bas -text

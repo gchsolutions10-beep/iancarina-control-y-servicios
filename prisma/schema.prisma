@@ -1,0 +1,170 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../lib/generated/prisma"
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["cys"]
+}
+
+model app_ajustes {
+  clave           String        @id @db.VarChar(80)
+  valor           Json
+  descripcion     String?
+  actualizado_en  DateTime      @default(now()) @db.Timestamptz(6)
+  actualizado_por Int?
+  app_usuarios    app_usuarios? @relation(fields: [actualizado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("cys")
+}
+
+model app_bitacora {
+  id                 BigInt   @id @default(autoincrement())
+  id_usuario_gestion Int?
+  fecha_gestion      DateTime @db.Timestamp(6)
+  modulo             String
+  descripcion        String?
+  empresa            String?  @db.VarChar(30)
+  operacion          String?  @db.VarChar(40)
+  entidad            String?  @db.VarChar(60)
+  id_registro        String?
+  cambios            Json?
+  motivo             String?
+
+  @@index([fecha_gestion(sort: Desc)], map: "app_bitacora_fecha")
+  @@index([entidad, id_registro], map: "app_bitacora_registro")
+  @@schema("cys")
+}
+
+/// Empresas del grupo: cada una se maneja por separado (frontera de datos).
+model app_empresas {
+  codigo               String                 @id @db.VarChar(30)
+  nombre               String                 @db.VarChar(150)
+  rif                  String?                @db.VarChar(20)
+  orden                Int                    @default(0)
+  activa               Boolean                @default(true)
+  creado_en            DateTime               @default(now()) @db.Timestamptz(6)
+  app_usuario_empresas app_usuario_empresas[]
+  app_usuario_permisos app_usuario_permisos[]
+
+  @@schema("cys")
+}
+
+model app_migraciones {
+  nombre      String   @id @db.VarChar(255)
+  checksum    String   @db.Char(64)
+  aplicada_en DateTime @default(now()) @db.Timestamptz(6)
+
+  @@schema("cys")
+}
+
+model app_permisos {
+  codigo               String                 @id @db.VarChar(60)
+  nombre               String                 @db.VarChar(120)
+  grupo                String                 @db.VarChar(60)
+  alcance              String                 @db.VarChar(15)
+  descripcion          String?
+  app_rol_permisos     app_rol_permisos[]
+  app_usuario_permisos app_usuario_permisos[]
+
+  @@schema("cys")
+}
+
+model app_rol_permisos {
+  id_rol         Int
+  codigo_permiso String       @db.VarChar(60)
+  app_permisos   app_permisos @relation(fields: [codigo_permiso], references: [codigo], onDelete: Cascade, onUpdate: NoAction)
+  app_roles      app_roles    @relation(fields: [id_rol], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([id_rol, codigo_permiso])
+  @@schema("cys")
+}
+
+model app_roles {
+  id                   Int                    @id @default(autoincrement())
+  codigo               String                 @unique @db.VarChar(30)
+  nombre               String                 @db.VarChar(120)
+  alcance              String                 @db.VarChar(15)
+  nivel                Int                    @default(0)
+  descripcion          String?
+  activo               Boolean                @default(true)
+  app_rol_permisos     app_rol_permisos[]
+  app_usuario_empresas app_usuario_empresas[]
+  app_usuario_roles    app_usuario_roles[]
+
+  @@schema("cys")
+}
+
+model app_usuario_empresas {
+  id_usuario    Int
+  empresa       String        @db.VarChar(30)
+  id_rol        Int
+  vigente_hasta DateTime?     @db.Date
+  asignado_por  Int?
+  asignado_en   DateTime      @default(now()) @db.Timestamptz(6)
+  asignador     app_usuarios? @relation("app_usuario_empresas_asignado_por", fields: [asignado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  app_empresas  app_empresas  @relation(fields: [empresa], references: [codigo], onDelete: NoAction, onUpdate: Cascade)
+  app_roles     app_roles     @relation(fields: [id_rol], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario       app_usuarios  @relation("app_usuario_empresas_id_usuario", fields: [id_usuario], references: [id_usuario], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([id_usuario, empresa])
+  @@schema("cys")
+}
+
+model app_usuario_permisos {
+  id_usuario     Int
+  empresa        String        @db.VarChar(30)
+  codigo_permiso String        @db.VarChar(60)
+  vigente_hasta  DateTime?     @db.Date
+  asignado_por   Int?
+  asignado_en    DateTime      @default(now()) @db.Timestamptz(6)
+  asignador      app_usuarios? @relation("app_usuario_permisos_asignado_por", fields: [asignado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  app_permisos   app_permisos  @relation(fields: [codigo_permiso], references: [codigo], onDelete: Cascade, onUpdate: NoAction)
+  app_empresas   app_empresas  @relation(fields: [empresa], references: [codigo], onDelete: NoAction, onUpdate: Cascade)
+  usuario        app_usuarios  @relation("app_usuario_permisos_id_usuario", fields: [id_usuario], references: [id_usuario], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([id_usuario, empresa, codigo_permiso])
+  @@schema("cys")
+}
+
+model app_usuario_roles {
+  id_usuario   Int
+  id_rol       Int
+  app_roles    app_roles    @relation(fields: [id_rol], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  app_usuarios app_usuarios @relation(fields: [id_usuario], references: [id_usuario], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([id_usuario, id_rol])
+  @@schema("cys")
+}
+
+model app_usuarios {
+  id_usuario          Int                    @id @default(autoincrement())
+  nombre_usuario      String                 @db.VarChar(50)
+  nombre_apellido     String                 @db.VarChar(100)
+  cedula              String?                @unique(map: "app_usuarios_cedula", where: raw("(cedula IS NOT NULL)")) @db.VarChar(20)
+  cargo               String?                @db.VarChar(100)
+  clave_hash          String?
+  debe_cambiar_clave  Boolean                @default(false)
+  bloqueado           Boolean                @default(false)
+  intentos_fallidos   Int                    @default(0)
+  bloqueado_hasta     DateTime?              @db.Timestamptz(6)
+  ultimo_acceso       DateTime?              @db.Timestamptz(6)
+  clave_actualizada   DateTime?              @db.Timestamptz(6)
+  recibe_alertas      Boolean                @default(false)
+  recibe_aprobaciones Boolean                @default(false)
+  creado_en           DateTime               @default(now()) @db.Timestamptz(6)
+  creado_por          Int?
+  actualizado_en      DateTime               @default(now()) @db.Timestamptz(6)
+  app_ajustes         app_ajustes[]
+  empresas_asignadas  app_usuario_empresas[] @relation("app_usuario_empresas_asignado_por")
+  empresas            app_usuario_empresas[] @relation("app_usuario_empresas_id_usuario")
+  permisos_asignados  app_usuario_permisos[] @relation("app_usuario_permisos_asignado_por")
+  permisos_extra      app_usuario_permisos[] @relation("app_usuario_permisos_id_usuario")
+  app_usuario_roles   app_usuario_roles[]
+  creador             app_usuarios?          @relation("app_usuariosToapp_usuarios", fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  creados             app_usuarios[]         @relation("app_usuariosToapp_usuarios")
+
+  @@schema("cys")
+}

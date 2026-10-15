@@ -1,0 +1,147 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   Tokens de diseño — Mary Iancarina
+   Los componentes usan roles (superficie, tinta, borde, marca), nunca hex sueltos.
+   ========================================================================== */
+
+@custom-variant dark {
+  &:where([data-tema="oscuro"], [data-tema="oscuro"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-tema="claro"]), :root:not([data-tema="claro"]) *) {
+      @slot;
+    }
+  }
+}
+
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Rojo Alimentos Mary. 500 = color oficial del logo (#e72a18), para logo y
+     acentos grandes. 600 = acciones y texto: 4.99:1 con blanco (WCAG AA). */
+  --color-marca-50: #fef3f1;
+  --color-marca-100: #fde3df;
+  --color-marca-200: #fbc9c2;
+  --color-marca-400: #f26252;
+  --color-marca-500: #e72a18;
+  --color-marca-600: #d82614;
+  --color-marca-700: #b81f10;
+  --color-marca-800: #95190d;
+  --color-marca-900: #7a1a10;
+  --color-marca-950: #430905;
+
+  /* Acento maíz: uso mínimo (detalles de la portada). */
+
+  --ease-suave: cubic-bezier(0.2, 0, 0, 1);
+
+  --animate-entrada: entrada 260ms var(--ease-suave) both;
+
+  @keyframes entrada {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Roles semánticos (cambian en modo oscuro) */
+@theme inline {
+  --color-fondo: var(--fondo);
+  --color-superficie: var(--superficie);
+  --color-superficie-2: var(--superficie-2);
+  --color-borde: var(--borde);
+  --color-borde-fuerte: var(--borde-fuerte);
+  --color-tinta: var(--tinta);
+  --color-tinta-suave: var(--tinta-suave);
+  --color-tinta-tenue: var(--tinta-tenue);
+  --color-serie: var(--serie);
+  --color-exito: var(--exito);
+  --color-error: var(--error);
+  --color-aviso: var(--aviso);
+}
+
+:root {
+  color-scheme: light;
+  --fondo: #f7f6f4;
+  --superficie: #ffffff;
+  --superficie-2: #f2f1ee;
+  --borde: rgb(28 25 23 / 0.08);
+  --borde-fuerte: rgb(28 25 23 / 0.16);
+  --tinta: #1c1917;
+  --tinta-suave: #57534e;
+  --tinta-tenue: #78716c;
+  --serie: #d82614;
+  --exito: #15803d;
+  --error: #b81f10;
+  --aviso: #b45309;
+  /* Gráficas (validadas con dataviz): JL/TPN y empaque/calidad. */
+  --viz-jl: #2a78d6;
+  --viz-tpn: #eb6834;
+  --viz-emp: #1baf7a;
+  --viz-cal: #4a3aa7;
+  --viz-otros: #918b86;
+  /* Categóricos genéricos (1.º y 2.º del orden validado). */
+  --viz-a: #2a78d6;
+  --viz-b: #eb6834;
+}
+
+/* Tema oscuro: elegido por el usuario (data-tema="oscuro") o del sistema si no eligió "claro". */
+:root[data-tema="oscuro"] {
+  color-scheme: dark;
+  --fondo: #121110;
+  --superficie: #1c1a19;
+  --superficie-2: #262423;
+  --borde: rgb(255 255 255 / 0.08);
+  --borde-fuerte: rgb(255 255 255 / 0.16);
+  --tinta: #f5f5f4;
+  --tinta-suave: #c3c0bc;
+  --tinta-tenue: #a19d98;
+  --serie: #f26252;
+  --exito: #4ade80;
+  --error: #f87171;
+  --aviso: #fbbf24;
+  --viz-jl: #3987e5;
+  --viz-tpn: #d95926;
+  --viz-emp: #199e70;
+  --viz-cal: #9085e9;
+  --viz-otros: #78716c;
+  --viz-a: #3987e5;
+  --viz-b: #d95926;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    color-scheme: dark;
+    --fondo: #121110;
+    --superficie: #1c1a19;
+    --superficie-2: #262423;
+    --borde: rgb(255 255 255 / 0.08);
+    --borde-fuerte: rgb(255 255 255 / 0.16);
+    --tinta: #f5f5f4;
+    --tinta-suave: #c3c0bc;
+    --tinta-tenue: #a19d98;
+    --serie: #f26252;
+    --exito: #4ade80;
+    --error: #f87171;
+    --aviso: #fbbf24;
+    --viz-jl: #3987e5;
+    --viz-tpn: #d95926;
+    --viz-emp: #199e70;
+    --viz-cal: #9085e9;
+    --viz-otros: #78716c;
+    --viz-a: #3987e5;
+    --viz-b: #d95926;
+  }
+}
+
+body {
+  background: var(--fondo);
+  color: var(--tinta);
+}

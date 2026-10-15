@@ -14,7 +14,7 @@ Esquema PostgreSQL: `cys` (nombre por confirmar). Tablas del sistema base con pr
 | D5 | **Endosos** (`endosos`) como único camino para cambiar un período confirmado (altas, bajas, cambios de tomador/asegurado/beneficiario, valores, anulación). Estados: simulado → enviado → confirmado por la aseguradora → (anulado). | Separa simulación, importe de la aseguradora y obligación financiera. |
 | D6 | **Reglas versionadas**: tasas, fórmulas, límites y prorrateos con ámbito (aseguradora, ramo, cobertura, póliza, período) y vigencia. Una regla aprobada no se edita: se crea versión nueva. | No hay un valor global; cada cálculo guarda la versión exacta usada. |
 | D7 | **Dinero por movimientos**: obligaciones (por pagar / por cobrar) + pagos + imputaciones. Saldo = monto − Σ imputaciones vigentes. Anular = movimiento inverso autorizado. | Pagos parciales, un pago que cubre varias obligaciones, saldos verificables. «Autorizado» o «reconocido» nunca significa «pagado» o «cobrado». |
-| D8 | **Empresa como frontera de datos** (`id_empresa` en todo registro de negocio) y acceso por empresa en el usuario. Personas: identidad única del grupo, visibilidad por vínculo (ver §6). | Separación entre filiales sin duplicar a la persona que es socia de dos empresas. |
+| D8 | **Empresa como frontera de datos** (`id_empresa` en todo registro de negocio, **también en personas**) y acceso por empresa en el usuario. Las llaves entre tablas de negocio son compuestas `(id_empresa, id)` para que nada apunte a otra empresa. | Confirmado por el cliente: las empresas se manejan por separado y no hay pólizas entre filiales. |
 | D9 | **Archivos fuera de la base**: la BD guarda metadatos y una clave de almacenamiento generada por el servidor; el contenido va a carpeta compartida (intranet) o almacenamiento de objetos (demo). | Requisito explícito; mismo código con dos adaptadores. |
 | D10 | **Bitácora append-only** estructurada (`app_bitacora`: operación, entidad, id, cambios `jsonb`, motivo) además del texto legible estilo `tgesth`. | Auditoría consultable por registro; nadie puede editarla (disparador que impide UPDATE/DELETE). |
 
@@ -240,10 +240,11 @@ calcula.
 - Todo registro de negocio lleva `id_empresa`. La DAL arma el alcance del usuario
   (`app_usuario_empresas` vigentes) y toda consulta filtra por él; las acciones verifican que la
   empresa del registro esté en el alcance antes de leer o escribir.
-- Personas: una sola ficha en el grupo. Un usuario ve una persona si está vinculada a una empresa de
-  su alcance (relación, titularidad, inclusión, beneficiario o siniestro), o si la creó él. Fuera de
-  eso, la búsqueda por identificación solo responde «ya existe; pida acceso al administrador»
-  (pregunta 21).
+- Personas: cada empresa tiene sus propias fichas (`id_empresa`, identificación única dentro de la
+  empresa). Ninguna búsqueda revela datos de otra empresa (respuesta 21).
+- Integridad: cada tabla de negocio tiene `UNIQUE (id_empresa, id)` y las llaves foráneas entre
+  ellas son compuestas `(id_empresa, id_x)`, así la base misma impide relacionar registros de dos
+  empresas.
 - Campos sensibles (fecha de nacimiento, contacto, dirección, siniestros de personas con
   `confidencial`) exigen `personas.datos_sensibles`; sin él se muestran enmascarados. Cada consulta de
   la ficha completa queda en la bitácora.
