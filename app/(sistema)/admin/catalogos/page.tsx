@@ -5,7 +5,7 @@ import { AyudaModulo } from "@/components/ayuda/ayuda-modulo";
 import { BotonAlternar } from "@/components/fichas/boton-alternar";
 import { Encabezado } from "@/components/fichas/piezas";
 import { Seccion } from "@/components/formularios/controles";
-import { Entrada, FormularioAccion, Seleccion } from "@/components/formularios/formulario-accion";
+import { Casilla, Entrada, FormularioAccion, Seleccion } from "@/components/formularios/formulario-accion";
 import { requerirSesion, tienePermiso } from "@/lib/auth/dal";
 import { guia } from "@/lib/ayuda/guias";
 import { LISTAS, type Lista } from "@/lib/catalogos";
@@ -16,10 +16,12 @@ export const metadata: Metadata = { title: "Catálogos" };
 export default async function Catalogos() {
   const usuario = await requerirSesion();
   if (!tienePermiso(usuario, "admin.sistema")) redirect("/sin-acceso");
-  const [valores, marcas] = await Promise.all([
+  const [valores, marcas, ramos] = await Promise.all([
     db.catalogo_valores.findMany({ orderBy: [{ orden: "asc" }, { nombre: "asc" }] }),
     db.marcas.findMany({ orderBy: { nombre: "asc" }, include: { modelos: { orderBy: { nombre: "asc" } } } }),
+    db.ramos.findMany({ orderBy: { nombre: "asc" }, include: { coberturas: { orderBy: [{ orden: "asc" }, { nombre: "asc" }] } } }),
   ]);
+  const SUJETOS = { vehiculo: "vehículos", persona: "personas", propiedad: "propiedades" } as const;
 
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
@@ -47,6 +49,35 @@ export default async function Catalogos() {
                 <FormularioAccion accion={agregarCatalogo} boton="Agregar modelo" variante="secundario" ocultos={{ que: "modelo" }}>
                   <Seleccion nombre="id_marca" etiqueta="Marca" opciones={marcas.filter((m) => m.activo).map((m) => ({ valor: String(m.id), etiqueta: m.nombre }))} />
                   <Entrada nombre="nombre" etiqueta="Nuevo modelo" mayusculas />
+                </FormularioAccion>
+              )}
+            </div>
+          </div>
+        </Seccion>
+        <Seccion titulo="Ramos y coberturas" descripcion="Cada ramo asegura un tipo de ficha. Una cobertura «incluida en» otra no suma dos veces en el total.">
+          <div className="flex flex-col gap-4">
+            {ramos.map((r) => (
+              <div key={r.id}>
+                <BotonAlternar que="ramo" id={r.id} nombre={`${r.nombre} (${SUJETOS[r.sujeto as keyof typeof SUJETOS] ?? r.sujeto})`} activo={r.activo} />
+                <div className="mt-2 ml-3 flex flex-wrap gap-1.5 border-l border-borde pl-3">
+                  {r.coberturas.map((c) => (
+                    <BotonAlternar key={c.id} que="cobertura" id={c.id} nombre={`${c.nombre}${c.incluida_en_padre ? " (incluida)" : ""}`} activo={c.activo} />
+                  ))}
+                  {r.coberturas.length === 0 && <span className="text-xs text-tinta-tenue">Sin coberturas</span>}
+                </div>
+              </div>
+            ))}
+            <div className="grid gap-4 border-t border-borde pt-4 sm:grid-cols-2">
+              <FormularioAccion accion={agregarCatalogo} boton="Agregar ramo" variante="secundario" ocultos={{ que: "ramo" }}>
+                <Entrada nombre="nombre" etiqueta="Nuevo ramo" />
+                <Seleccion nombre="sujeto" etiqueta="Asegura" opciones={[{ valor: "vehiculo", etiqueta: "Vehículos" }, { valor: "persona", etiqueta: "Personas" }, { valor: "propiedad", etiqueta: "Propiedades" }]} />
+              </FormularioAccion>
+              {ramos.length > 0 && (
+                <FormularioAccion accion={agregarCatalogo} boton="Agregar cobertura" variante="secundario" ocultos={{ que: "cobertura" }}>
+                  <Seleccion nombre="id_ramo" etiqueta="Ramo" opciones={ramos.filter((r) => r.activo).map((r) => ({ valor: String(r.id), etiqueta: r.nombre }))} />
+                  <Entrada nombre="nombre" etiqueta="Nueva cobertura" />
+                  <Seleccion nombre="id_padre" etiqueta="Dentro de (opcional)" vacio="Ninguna" opciones={ramos.flatMap((r) => r.coberturas.map((c) => ({ valor: String(c.id), etiqueta: `${r.nombre} › ${c.nombre}` })))} />
+                  <Casilla nombre="incluida_en_padre" etiqueta="Su prima ya está incluida en la de esa cobertura" />
                 </FormularioAccion>
               )}
             </div>

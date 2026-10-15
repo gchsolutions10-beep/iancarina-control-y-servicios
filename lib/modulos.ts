@@ -78,8 +78,8 @@ export const AREAS: Area[] = [
       {
         nombre: "Pólizas y renovaciones",
         modulos: [
-          { id: "polizas", nombre: "Pólizas", descripcion: "Vigencias, certificados, asegurados, coberturas y beneficiarios", icono: FileText, permiso: "seguros.ver", origen: "cys.polizas" },
-          { id: "renovaciones", nombre: "Renovación anual", descripcion: "Nueva vigencia con comparación contra el año anterior", icono: RefreshCcw, permiso: "seguros.ver", origen: "cys.poliza_periodos" },
+          { id: "polizas", nombre: "Pólizas", descripcion: "Vigencias, certificados, asegurados, coberturas y beneficiarios", icono: FileText, permiso: "seguros.ver", origen: "cys.polizas", ruta: "/polizas/lista" },
+          { id: "renovaciones", nombre: "Renovación anual", descripcion: "Nueva vigencia con comparación contra el año anterior", icono: RefreshCcw, permiso: "seguros.ver", origen: "cys.poliza_periodos", ruta: "/polizas/renovaciones" },
         ],
       },
     ],
@@ -106,7 +106,7 @@ export const AREAS: Area[] = [
       {
         nombre: "Pagos y cobros",
         modulos: [
-          { id: "primas-por-pagar", nombre: "Primas por pagar", descripcion: "Obligaciones con las aseguradoras y sus pagos parciales", icono: Wallet, permiso: "seguros.ver", origen: "cys.obligaciones" },
+          { id: "primas-por-pagar", nombre: "Primas por pagar", descripcion: "Obligaciones con las aseguradoras, pagos parciales y devoluciones por bajas", icono: Wallet, permiso: "seguros.ver", origen: "cys.vw_saldos_obligaciones", ruta: "/finanzas/primas" },
           { id: "cuentas-por-cobrar", nombre: "Cuentas por cobrar", descripcion: "Reembolsos de siniestros reconocidos, pendientes y recibidos", icono: HandCoins, permiso: "seguros.ver", origen: "cys.obligaciones" },
         ],
       },

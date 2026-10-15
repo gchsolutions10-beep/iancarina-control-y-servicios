@@ -25,6 +25,16 @@ Esquema PostgreSQL: `cys` (nombre por confirmar). Tablas del sistema base con pr
 > la migración 003 por pedido del cliente; las organizaciones (aseguradoras, talleres…) son
 > partes jurídicas con `funciones`. Catálogos simples en `catalogo_valores`; marcas y modelos aparte.
 
+> **Implementado en la Etapa 3 (migración 004):** pólizas, períodos, partes del período, tarifas del
+> período (tasas y primas fijas por cobertura y clase, en vez de `parametros_regla`), inclusiones con
+> coberturas y beneficiarios, endosos con su detalle (`endoso_lineas`), reglas de cálculo versionadas,
+> cálculos guardados y el núcleo financiero (obligaciones, movimientos, pagos, imputaciones y la vista
+> de saldos). Cambios respecto a la propuesta: el certificado es un texto de la inclusión (sin tabla
+> `certificados`); el ajuste de un cálculo se guarda en la misma cobertura (`prima_calculada`,
+> `motivo_ajuste`, `ajustado_por`) más la bitácora, sin tabla `calculo_ajustes`; los estados del
+> período son `borrador`/`confirmado`/`anulado` y «vigente / por vencer / vencido» se calcula con la
+> fecha; `limites` queda para la Etapa 4 (riesgos diversos). Detalle en `docs/modulos/polizas.md`.
+
 ## 2. Diagrama general
 
 ```mermaid

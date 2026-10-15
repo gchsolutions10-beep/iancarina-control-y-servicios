@@ -35,7 +35,10 @@ del sistema (login, usuarios, ajustes, componentes) se copió de ahí y ya no se
 - Nunca se borran registros de negocio: se dan de baja, se anulan con un movimiento inverso o se
   fusionan (personas duplicadas). Los períodos confirmados de una póliza no se editan: se endosan.
 - Importes `numeric(18,2)` (tasas `numeric(18,8)`) y siempre con su moneda; nunca se convierten
-  monedas solas.
+  monedas solas. En el servidor, `decimal.js` (nunca float); a la pantalla viajan como texto decimal.
+- Vigencias en rango semiabierto `[desde, hasta)` con `hasta` = fin que dice la póliza (365 días).
+- Un período confirmado solo cambia por endoso (disparadores en la base). Saldos solo desde
+  `cys.vw_saldos_obligaciones` (movimientos − imputaciones vigentes).
 
 ## Usuarios y permisos
 
@@ -74,7 +77,10 @@ del sistema (login, usuarios, ajustes, componentes) se copió de ahí y ya no se
 - [x] Etapa 2: personas y empresas (`docs/modulos/personas.md`; sin socios ni acciones), vehículos y propiedades con
       titulares y bajas, documentos y fotos en Blob privado / carpeta (`docs/modulos/activos.md`), catálogos
 - [ ] Etapa 2b: consolidar personas duplicadas (fusión) — cuando haya pólizas que reapuntar
-- [ ] Etapa 3: pólizas, motor de cálculo, renovaciones, altas/bajas, núcleo financiero de primas
+- [x] Etapa 3: pólizas con vigencias, asegurados, coberturas, tarifas y beneficiarios; motor de cálculo
+      con reglas versionadas (propuesta de mercado marcada «Propuesta»); endosos de alta, baja y cambios;
+      renovación anual con elegibilidad y comparación; primas por pagar con pagos parciales y anulación
+      (`docs/modulos/polizas.md`)
 - [ ] Etapa 4: siniestros
 - [ ] Etapa 5: finanzas completas, indicadores y reportes
 - [ ] Etapa 6: despliegue dual e instalación

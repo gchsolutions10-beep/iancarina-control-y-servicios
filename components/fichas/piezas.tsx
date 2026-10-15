@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ChevronLeft, CircleCheck, CircleMinus, CircleX } from "lucide-react";
+import { ChevronLeft, CircleCheck, CircleDashed, CircleMinus, CircleX, Clock, TriangleAlert } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 /** Encabezado de pantalla con regreso, título, subtítulo y acciones. */
@@ -27,7 +27,7 @@ export function Encabezado({ volver, titulo, subtitulo, ayuda, acciones }: { vol
   );
 }
 
-const ESTADOS: Record<string, { texto: string; tono: "ok" | "neutro" | "baja"; icono: typeof CircleCheck }> = {
+const ESTADOS: Record<string, { texto: string; tono: "ok" | "neutro" | "baja" | "aviso"; icono: typeof CircleCheck }> = {
   activo: { texto: "Activo", tono: "ok", icono: CircleCheck },
   activa: { texto: "Activa", tono: "ok", icono: CircleCheck },
   inactiva: { texto: "Inactiva", tono: "neutro", icono: CircleMinus },
@@ -37,6 +37,18 @@ const ESTADOS: Record<string, { texto: string; tono: "ok" | "neutro" | "baja"; i
   retirada: { texto: "Retirada", tono: "baja", icono: CircleX },
   vigente: { texto: "Vigente", tono: "ok", icono: CircleCheck },
   terminada: { texto: "Terminada", tono: "neutro", icono: CircleMinus },
+  // Pólizas (vigencia) y primas
+  borrador: { texto: "En preparación", tono: "neutro", icono: CircleDashed },
+  futuro: { texto: "Por iniciar", tono: "neutro", icono: Clock },
+  por_vencer: { texto: "Por vencer", tono: "aviso", icono: TriangleAlert },
+  vencido: { texto: "Vencida", tono: "baja", icono: CircleX },
+  anulado: { texto: "Anulada", tono: "neutro", icono: CircleMinus },
+  sin_periodo: { texto: "Sin vigencia", tono: "neutro", icono: CircleMinus },
+  pagada: { texto: "Pagada", tono: "ok", icono: CircleCheck },
+  vencida: { texto: "Vencida", tono: "baja", icono: CircleX },
+  pendiente: { texto: "Pendiente", tono: "neutro", icono: Clock },
+  anulada: { texto: "Anulada", tono: "neutro", icono: CircleMinus },
+  baja: { texto: "Dado de baja", tono: "baja", icono: CircleX },
 };
 
 /** Estado con ícono y texto (nunca solo color). */
@@ -49,6 +61,7 @@ export function Insignia({ estado }: { estado: string }) {
         e.tono === "ok" && "bg-exito/10 text-exito",
         e.tono === "neutro" && "bg-superficie-2 text-tinta-suave",
         e.tono === "baja" && "bg-error/10 text-error",
+        e.tono === "aviso" && "bg-aviso/15 text-tinta",
       )}
     >
       <e.icono className="size-3.5" aria-hidden />

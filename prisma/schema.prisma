@@ -50,8 +50,13 @@ model app_empresas {
   app_usuario_empresas app_usuario_empresas[]
   app_usuario_permisos app_usuario_permisos[]
   archivos             archivos[]
+  calculos             calculos[]
+  obligaciones         obligaciones[]
+  pagos                pagos[]
   partes               partes[]
+  polizas              polizas[]
   propiedades          propiedades[]
+  reglas_calculo       reglas_calculo[]
   vehiculos            vehiculos[]
 
   @@schema("cys")
@@ -146,40 +151,58 @@ model app_usuario_roles {
 
 /// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model app_usuarios {
-  id_usuario                                            Int                    @id @default(autoincrement())
-  nombre_usuario                                        String                 @db.VarChar(50)
-  nombre_apellido                                       String                 @db.VarChar(100)
-  cedula                                                String?                @unique(map: "app_usuarios_cedula", where: raw("(cedula IS NOT NULL)")) @db.VarChar(20)
-  cargo                                                 String?                @db.VarChar(100)
-  clave_hash                                            String?
-  debe_cambiar_clave                                    Boolean                @default(false)
-  bloqueado                                             Boolean                @default(false)
-  intentos_fallidos                                     Int                    @default(0)
-  bloqueado_hasta                                       DateTime?              @db.Timestamptz(6)
-  ultimo_acceso                                         DateTime?              @db.Timestamptz(6)
-  clave_actualizada                                     DateTime?              @db.Timestamptz(6)
-  recibe_alertas                                        Boolean                @default(false)
-  recibe_aprobaciones                                   Boolean                @default(false)
-  creado_en                                             DateTime               @default(now()) @db.Timestamptz(6)
-  creado_por                                            Int?
-  actualizado_en                                        DateTime               @default(now()) @db.Timestamptz(6)
-  app_ajustes                                           app_ajustes[]
-  empresas_asignadas                                    app_usuario_empresas[] @relation("app_usuario_empresas_asignado_por")
-  empresas                                              app_usuario_empresas[] @relation("app_usuario_empresas_id_usuario")
-  permisos_asignados                                    app_usuario_permisos[] @relation("app_usuario_permisos_asignado_por")
-  permisos_extra                                        app_usuario_permisos[] @relation("app_usuario_permisos_id_usuario")
-  app_usuario_roles                                     app_usuario_roles[]
-  creador                                               app_usuarios?          @relation("app_usuariosToapp_usuarios", fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
-  creados                                               app_usuarios[]         @relation("app_usuariosToapp_usuarios")
-  archivos                                              archivos[]
-  documentos                                            documentos[]
-  partes_partes_actualizado_porToapp_usuarios           partes[]               @relation("partes_actualizado_porToapp_usuarios")
-  partes_partes_creado_porToapp_usuarios                partes[]               @relation("partes_creado_porToapp_usuarios")
-  propiedades_propiedades_actualizado_porToapp_usuarios propiedades[]          @relation("propiedades_actualizado_porToapp_usuarios")
-  propiedades_propiedades_creado_porToapp_usuarios      propiedades[]          @relation("propiedades_creado_porToapp_usuarios")
-  titularidades                                         titularidades[]
-  vehiculos_vehiculos_actualizado_porToapp_usuarios     vehiculos[]            @relation("vehiculos_actualizado_porToapp_usuarios")
-  vehiculos_vehiculos_creado_porToapp_usuarios          vehiculos[]            @relation("vehiculos_creado_porToapp_usuarios")
+  id_usuario                                                           Int                      @id @default(autoincrement())
+  nombre_usuario                                                       String                   @db.VarChar(50)
+  nombre_apellido                                                      String                   @db.VarChar(100)
+  cedula                                                               String?                  @unique(map: "app_usuarios_cedula", where: raw("(cedula IS NOT NULL)")) @db.VarChar(20)
+  cargo                                                                String?                  @db.VarChar(100)
+  clave_hash                                                           String?
+  debe_cambiar_clave                                                   Boolean                  @default(false)
+  bloqueado                                                            Boolean                  @default(false)
+  intentos_fallidos                                                    Int                      @default(0)
+  bloqueado_hasta                                                      DateTime?                @db.Timestamptz(6)
+  ultimo_acceso                                                        DateTime?                @db.Timestamptz(6)
+  clave_actualizada                                                    DateTime?                @db.Timestamptz(6)
+  recibe_alertas                                                       Boolean                  @default(false)
+  recibe_aprobaciones                                                  Boolean                  @default(false)
+  creado_en                                                            DateTime                 @default(now()) @db.Timestamptz(6)
+  creado_por                                                           Int?
+  actualizado_en                                                       DateTime                 @default(now()) @db.Timestamptz(6)
+  app_ajustes                                                          app_ajustes[]
+  empresas_asignadas                                                   app_usuario_empresas[]   @relation("app_usuario_empresas_asignado_por")
+  empresas                                                             app_usuario_empresas[]   @relation("app_usuario_empresas_id_usuario")
+  permisos_asignados                                                   app_usuario_permisos[]   @relation("app_usuario_permisos_asignado_por")
+  permisos_extra                                                       app_usuario_permisos[]   @relation("app_usuario_permisos_id_usuario")
+  app_usuario_roles                                                    app_usuario_roles[]
+  creador                                                              app_usuarios?            @relation("app_usuariosToapp_usuarios", fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  creados                                                              app_usuarios[]           @relation("app_usuariosToapp_usuarios")
+  archivos                                                             archivos[]
+  beneficiarios                                                        beneficiarios[]
+  calculos                                                             calculos[]
+  documentos                                                           documentos[]
+  endosos                                                              endosos[]
+  imputaciones                                                         imputaciones[]
+  inclusion_coberturas_inclusion_coberturas_ajustado_porToapp_usuarios inclusion_coberturas[]   @relation("inclusion_coberturas_ajustado_porToapp_usuarios")
+  inclusion_coberturas_inclusion_coberturas_creado_porToapp_usuarios   inclusion_coberturas[]   @relation("inclusion_coberturas_creado_porToapp_usuarios")
+  inclusiones                                                          inclusiones[]
+  obligacion_movimientos                                               obligacion_movimientos[]
+  obligaciones                                                         obligaciones[]
+  pagos_pagos_anulado_porToapp_usuarios                                pagos[]                  @relation("pagos_anulado_porToapp_usuarios")
+  pagos_pagos_creado_porToapp_usuarios                                 pagos[]                  @relation("pagos_creado_porToapp_usuarios")
+  partes_partes_actualizado_porToapp_usuarios                          partes[]                 @relation("partes_actualizado_porToapp_usuarios")
+  partes_partes_creado_porToapp_usuarios                               partes[]                 @relation("partes_creado_porToapp_usuarios")
+  periodo_partes                                                       periodo_partes[]
+  periodo_tarifas                                                      periodo_tarifas[]
+  poliza_periodos_poliza_periodos_confirmado_porToapp_usuarios         poliza_periodos[]        @relation("poliza_periodos_confirmado_porToapp_usuarios")
+  poliza_periodos_poliza_periodos_creado_porToapp_usuarios             poliza_periodos[]        @relation("poliza_periodos_creado_porToapp_usuarios")
+  polizas_polizas_actualizado_porToapp_usuarios                        polizas[]                @relation("polizas_actualizado_porToapp_usuarios")
+  polizas_polizas_creado_porToapp_usuarios                             polizas[]                @relation("polizas_creado_porToapp_usuarios")
+  propiedades_propiedades_actualizado_porToapp_usuarios                propiedades[]            @relation("propiedades_actualizado_porToapp_usuarios")
+  propiedades_propiedades_creado_porToapp_usuarios                     propiedades[]            @relation("propiedades_creado_porToapp_usuarios")
+  reglas_calculo                                                       reglas_calculo[]
+  titularidades                                                        titularidades[]
+  vehiculos_vehiculos_actualizado_porToapp_usuarios                    vehiculos[]              @relation("vehiculos_actualizado_porToapp_usuarios")
+  vehiculos_vehiculos_creado_porToapp_usuarios                         vehiculos[]              @relation("vehiculos_creado_porToapp_usuarios")
 
   @@schema("cys")
 }
@@ -234,16 +257,19 @@ model documentos {
   retirado        Boolean      @default(false)
   creado_en       DateTime     @default(now()) @db.Timestamptz(6)
   creado_por      Int
+  id_poliza       BigInt?
   app_usuarios    app_usuarios @relation(fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
   archivos        archivos     @relation(fields: [empresa, id_archivo], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
   partes          partes?      @relation(fields: [empresa, id_parte], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
   propiedades     propiedades? @relation(fields: [empresa, id_propiedad], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
   vehiculos       vehiculos?   @relation(fields: [empresa, id_vehiculo], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  polizas         polizas?     @relation(fields: [empresa, id_poliza], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction, map: "documentos_poliza")
 
   @@unique([empresa, id])
   @@index([empresa, id_parte], map: "documentos_parte", where: raw("(id_parte IS NOT NULL)"))
   @@index([empresa, id_propiedad], map: "documentos_propiedad", where: raw("(id_propiedad IS NOT NULL)"))
   @@index([empresa, id_vehiculo], map: "documentos_vehiculo", where: raw("(id_vehiculo IS NOT NULL)"))
+  @@index([empresa, id_poliza], map: "documentos_poliza_idx", where: raw("(id_poliza IS NOT NULL)"))
   @@schema("cys")
 }
 
@@ -271,35 +297,42 @@ model modelos {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model partes {
-  id                                                BigInt          @id @default(autoincrement())
-  empresa                                           String          @db.VarChar(30)
-  tipo                                              String          @db.VarChar(10)
-  tipo_identificacion                               String          @db.VarChar(5)
-  numero_identificacion                             String          @db.VarChar(30)
-  identificacion_normalizada                        String?         @default(dbgenerated("cys.normalizar_codigo(((tipo_identificacion)::text || (numero_identificacion)::text))"))
-  nombres                                           String?         @db.VarChar(120)
-  apellidos                                         String?         @db.VarChar(120)
-  razon_social                                      String?         @db.VarChar(200)
-  funciones                                         String[]        @default([])
-  fecha_nacimiento                                  DateTime?       @db.Date
-  telefono                                          String?         @db.VarChar(40)
-  correo                                            String?         @db.VarChar(120)
+  id                                                BigInt           @id @default(autoincrement())
+  empresa                                           String           @db.VarChar(30)
+  tipo                                              String           @db.VarChar(10)
+  tipo_identificacion                               String           @db.VarChar(5)
+  numero_identificacion                             String           @db.VarChar(30)
+  identificacion_normalizada                        String?          @default(dbgenerated("cys.normalizar_codigo(((tipo_identificacion)::text || (numero_identificacion)::text))"))
+  nombres                                           String?          @db.VarChar(120)
+  apellidos                                         String?          @db.VarChar(120)
+  razon_social                                      String?          @db.VarChar(200)
+  funciones                                         String[]         @default([])
+  fecha_nacimiento                                  DateTime?        @db.Date
+  telefono                                          String?          @db.VarChar(40)
+  correo                                            String?          @db.VarChar(120)
   direccion                                         String?
   observaciones                                     String?
-  id_foto                                           String?         @db.Uuid
-  estado                                            String          @default("activa") @db.VarChar(10)
+  id_foto                                           String?          @db.Uuid
+  estado                                            String           @default("activa") @db.VarChar(10)
   fusionada_en                                      BigInt?
-  creado_en                                         DateTime        @default(now()) @db.Timestamptz(6)
+  creado_en                                         DateTime         @default(now()) @db.Timestamptz(6)
   creado_por                                        Int
-  actualizado_en                                    DateTime        @default(now()) @db.Timestamptz(6)
+  actualizado_en                                    DateTime         @default(now()) @db.Timestamptz(6)
   actualizado_por                                   Int?
+  beneficiarios                                     beneficiarios[]
   documentos                                        documentos[]
-  app_usuarios_partes_actualizado_porToapp_usuarios app_usuarios?   @relation("partes_actualizado_porToapp_usuarios", fields: [actualizado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
-  app_usuarios_partes_creado_porToapp_usuarios      app_usuarios    @relation("partes_creado_porToapp_usuarios", fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
-  app_empresas                                      app_empresas    @relation(fields: [empresa], references: [codigo], onDelete: NoAction)
-  partes                                            partes?         @relation("partesTopartes", fields: [empresa, fusionada_en], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
-  other_partes                                      partes[]        @relation("partesTopartes")
-  archivos                                          archivos?       @relation(fields: [empresa, id_foto], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  inclusiones                                       inclusiones[]
+  obligaciones                                      obligaciones[]
+  pagos                                             pagos[]
+  app_usuarios_partes_actualizado_porToapp_usuarios app_usuarios?    @relation("partes_actualizado_porToapp_usuarios", fields: [actualizado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  app_usuarios_partes_creado_porToapp_usuarios      app_usuarios     @relation("partes_creado_porToapp_usuarios", fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  app_empresas                                      app_empresas     @relation(fields: [empresa], references: [codigo], onDelete: NoAction)
+  partes                                            partes?          @relation("partesTopartes", fields: [empresa, fusionada_en], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  other_partes                                      partes[]         @relation("partesTopartes")
+  archivos                                          archivos?        @relation(fields: [empresa, id_foto], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  periodo_partes                                    periodo_partes[]
+  polizas                                           polizas[]
+  reglas_calculo                                    reglas_calculo[]
   titularidades                                     titularidades[]
 
   @@unique([empresa, id])
@@ -326,6 +359,7 @@ model propiedades {
   actualizado_en                                         DateTime        @default(now()) @db.Timestamptz(6)
   actualizado_por                                        Int?
   documentos                                             documentos[]
+  inclusiones                                            inclusiones[]
   app_usuarios_propiedades_actualizado_porToapp_usuarios app_usuarios?   @relation("propiedades_actualizado_porToapp_usuarios", fields: [actualizado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
   app_usuarios_propiedades_creado_porToapp_usuarios      app_usuarios    @relation("propiedades_creado_porToapp_usuarios", fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
   app_empresas                                           app_empresas    @relation(fields: [empresa], references: [codigo], onDelete: NoAction)
@@ -385,6 +419,7 @@ model vehiculos {
   actualizado_en                                       DateTime        @default(now()) @db.Timestamptz(6)
   actualizado_por                                      Int?
   documentos                                           documentos[]
+  inclusiones                                          inclusiones[]
   titularidades                                        titularidades[]
   app_usuarios_vehiculos_actualizado_porToapp_usuarios app_usuarios?   @relation("vehiculos_actualizado_porToapp_usuarios", fields: [actualizado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
   app_usuarios_vehiculos_creado_porToapp_usuarios      app_usuarios    @relation("vehiculos_creado_porToapp_usuarios", fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
@@ -397,4 +432,448 @@ model vehiculos {
   @@schema("cys")
 }
 
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This table contains exclusion constraints and requires additional setup for migrations. Visit https://pris.ly/d/exclusion-constraints for more info.
+model beneficiarios {
+  id           BigInt       @id @default(autoincrement())
+  empresa      String       @db.VarChar(30)
+  id_inclusion BigInt
+  id_parte     BigInt
+  parentesco   String?      @db.VarChar(60)
+  porcentaje   Decimal      @db.Decimal(7, 4)
+  desde        DateTime     @db.Date
+  hasta        DateTime?    @db.Date
+  id_endoso    BigInt?
+  creado_en    DateTime     @default(now()) @db.Timestamptz(6)
+  creado_por   Int
+  app_usuarios app_usuarios @relation(fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  endosos      endosos?     @relation(fields: [empresa, id_endoso], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  inclusiones  inclusiones  @relation(fields: [empresa, id_inclusion], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  partes       partes       @relation(fields: [empresa, id_parte], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@unique([empresa, id])
+  @@schema("cys")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model calculos {
+  id                   BigInt                 @id @default(autoincrement())
+  empresa              String                 @db.VarChar(30)
+  id_regla             Int?
+  tipo                 String                 @db.VarChar(15)
+  expresion            String?
+  entradas             Json                   @default("{}")
+  faltantes            Json                   @default("[]")
+  resultado            Decimal?               @db.Decimal(18, 2)
+  moneda               String?                @db.Char(3)
+  estado               String                 @default("simulacion") @db.VarChar(12)
+  creado_en            DateTime               @default(now()) @db.Timestamptz(6)
+  creado_por           Int
+  app_usuarios         app_usuarios           @relation(fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  app_empresas         app_empresas           @relation(fields: [empresa], references: [codigo], onDelete: NoAction)
+  reglas_calculo       reglas_calculo?        @relation(fields: [id_regla], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  inclusion_coberturas inclusion_coberturas[]
+  inclusiones          inclusiones[]
+
+  @@unique([empresa, id])
+  @@schema("cys")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model coberturas {
+  id                   Int                    @id @default(autoincrement())
+  id_ramo              Int
+  nombre               String                 @db.VarChar(120)
+  id_padre             Int?
+  incluida_en_padre    Boolean                @default(false)
+  orden                Int                    @default(0)
+  activo               Boolean                @default(true)
+  coberturas           coberturas?            @relation("coberturasTocoberturas", fields: [id_padre], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_coberturas     coberturas[]           @relation("coberturasTocoberturas")
+  ramos                ramos                  @relation(fields: [id_ramo], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  inclusion_coberturas inclusion_coberturas[]
+  periodo_tarifas      periodo_tarifas[]
+  reglas_calculo       reglas_calculo[]
+
+  @@unique([id_ramo, nombre])
+  @@schema("cys")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model endoso_lineas {
+  id                     BigInt               @id @default(autoincrement())
+  empresa                String               @db.VarChar(30)
+  id_endoso              BigInt
+  id_inclusion_cobertura BigInt
+  prima_anual            Decimal              @db.Decimal(18, 2)
+  dias                   Int
+  base_dias              Int?                 @db.SmallInt
+  importe                Decimal              @db.Decimal(18, 2)
+  origen                 String               @db.VarChar(12)
+  id_regla_prorrateo     Int?
+  endosos                endosos              @relation(fields: [empresa, id_endoso], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  inclusion_coberturas   inclusion_coberturas @relation(fields: [empresa, id_inclusion_cobertura], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  reglas_calculo         reglas_calculo?      @relation(fields: [id_regla_prorrateo], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([empresa, id])
+  @@schema("cys")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model endosos {
+  id                                                      BigInt                 @id @default(autoincrement())
+  empresa                                                 String                 @db.VarChar(30)
+  id_periodo                                              BigInt
+  numero                                                  Int
+  tipo                                                    String                 @db.VarChar(15)
+  fecha_efectiva                                          DateTime               @db.Date
+  numero_aseguradora                                      String?                @db.VarChar(40)
+  prima                                                   Decimal?               @db.Decimal(18, 2)
+  retroactivo                                             Boolean                @default(false)
+  descripcion                                             String
+  motivo                                                  String?
+  estado                                                  String                 @default("confirmado") @db.VarChar(10)
+  creado_en                                               DateTime               @default(now()) @db.Timestamptz(6)
+  creado_por                                              Int
+  beneficiarios                                           beneficiarios[]
+  endoso_lineas                                           endoso_lineas[]
+  app_usuarios                                            app_usuarios           @relation(fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  poliza_periodos                                         poliza_periodos        @relation(fields: [empresa, id_periodo], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  inclusion_coberturas                                    inclusion_coberturas[]
+  inclusiones_inclusiones_empresa_id_endoso_altaToendosos inclusiones[]          @relation("inclusiones_empresa_id_endoso_altaToendosos")
+  inclusiones_inclusiones_empresa_id_endoso_bajaToendosos inclusiones[]          @relation("inclusiones_empresa_id_endoso_bajaToendosos")
+  obligaciones                                            obligaciones[]
+  periodo_partes                                          periodo_partes[]
+
+  @@unique([empresa, id])
+  @@unique([id_periodo, numero])
+  @@schema("cys")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model imputaciones {
+  id                 BigInt        @id @default(autoincrement())
+  empresa            String        @db.VarChar(30)
+  id_pago            BigInt
+  id_obligacion      BigInt
+  monto              Decimal       @db.Decimal(18, 2)
+  fecha              DateTime      @db.Date
+  revierte_a         BigInt?       @unique(map: "imputaciones_una_reversion", where: raw("(revierte_a IS NOT NULL)"))
+  creado_en          DateTime      @default(now()) @db.Timestamptz(6)
+  creado_por         Int
+  app_usuarios       app_usuarios  @relation(fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  obligaciones       obligaciones  @relation(fields: [empresa, id_obligacion], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  pagos              pagos         @relation(fields: [empresa, id_pago], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  imputaciones       imputaciones? @relation("imputacionesToimputaciones", fields: [empresa, revierte_a], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  other_imputaciones imputaciones[] @relation("imputacionesToimputaciones")
+
+  @@unique([empresa, id])
+  @@index([id_obligacion], map: "imputaciones_obligacion")
+  @@index([id_pago], map: "imputaciones_pago")
+  @@schema("cys")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model inclusion_coberturas {
+  id                                                           BigInt          @id @default(autoincrement())
+  empresa                                                      String          @db.VarChar(30)
+  id_inclusion                                                 BigInt
+  id_cobertura                                                 Int
+  suma_asegurada                                               Decimal?        @db.Decimal(18, 2)
+  prima_anual                                                  Decimal?        @db.Decimal(18, 2)
+  prima_periodo                                                Decimal?        @db.Decimal(18, 2)
+  origen                                                       String?         @db.VarChar(12)
+  id_calculo                                                   BigInt?
+  prima_calculada                                              Decimal?        @db.Decimal(18, 2)
+  motivo_ajuste                                                String?
+  ajustado_por                                                 Int?
+  id_endoso                                                    BigInt?
+  creado_en                                                    DateTime        @default(now()) @db.Timestamptz(6)
+  creado_por                                                   Int
+  endoso_lineas                                                endoso_lineas[]
+  app_usuarios_inclusion_coberturas_ajustado_porToapp_usuarios app_usuarios?   @relation("inclusion_coberturas_ajustado_porToapp_usuarios", fields: [ajustado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  app_usuarios_inclusion_coberturas_creado_porToapp_usuarios   app_usuarios    @relation("inclusion_coberturas_creado_porToapp_usuarios", fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  calculos                                                     calculos?       @relation(fields: [empresa, id_calculo], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  endosos                                                      endosos?        @relation(fields: [empresa, id_endoso], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  inclusiones                                                  inclusiones     @relation(fields: [empresa, id_inclusion], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  coberturas                                                   coberturas      @relation(fields: [id_cobertura], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([empresa, id])
+  @@unique([id_inclusion, id_cobertura])
+  @@schema("cys")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This table contains exclusion constraints and requires additional setup for migrations. Visit https://pris.ly/d/exclusion-constraints for more info.
+model inclusiones {
+  id                                                  BigInt                 @id @default(autoincrement())
+  empresa                                             String                 @db.VarChar(30)
+  id_periodo                                          BigInt
+  id_persona                                          BigInt?
+  id_vehiculo                                         BigInt?
+  id_propiedad                                        BigInt?
+  certificado                                         String?                @db.VarChar(40)
+  ceco                                                String?                @db.VarChar(40)
+  clase_tarifa                                        String?                @db.VarChar(120)
+  desde                                               DateTime               @db.Date
+  hasta                                               DateTime               @db.Date
+  valor_bien                                          Decimal?               @db.Decimal(18, 2)
+  aditamentos                                         Decimal?               @db.Decimal(18, 2)
+  suma_asegurada                                      Decimal?               @db.Decimal(18, 2)
+  id_calculo_suma                                     BigInt?
+  id_inclusion_anterior                               BigInt?
+  id_endoso_alta                                      BigInt?
+  id_endoso_baja                                      BigInt?
+  observaciones                                       String?
+  creado_en                                           DateTime               @default(now()) @db.Timestamptz(6)
+  creado_por                                          Int
+  beneficiarios                                       beneficiarios[]
+  inclusion_coberturas                                inclusion_coberturas[]
+  calculos                                            calculos?              @relation(fields: [empresa, id_calculo_suma], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction, map: "inclusiones_calculo_suma")
+  app_usuarios                                        app_usuarios           @relation(fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  endosos_inclusiones_empresa_id_endoso_altaToendosos endosos?               @relation("inclusiones_empresa_id_endoso_altaToendosos", fields: [empresa, id_endoso_alta], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  endosos_inclusiones_empresa_id_endoso_bajaToendosos endosos?               @relation("inclusiones_empresa_id_endoso_bajaToendosos", fields: [empresa, id_endoso_baja], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  inclusiones                                         inclusiones?           @relation("inclusionesToinclusiones", fields: [empresa, id_inclusion_anterior], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  other_inclusiones                                   inclusiones[]          @relation("inclusionesToinclusiones")
+  poliza_periodos                                     poliza_periodos        @relation(fields: [empresa, id_periodo], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  partes                                              partes?                @relation(fields: [empresa, id_persona], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  propiedades                                         propiedades?           @relation(fields: [empresa, id_propiedad], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  vehiculos                                           vehiculos?             @relation(fields: [empresa, id_vehiculo], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([empresa, id])
+  @@index([empresa, id_periodo], map: "inclusiones_periodo")
+  @@index([empresa, id_persona], map: "inclusiones_persona", where: raw("(id_persona IS NOT NULL)"))
+  @@index([empresa, id_propiedad], map: "inclusiones_propiedad", where: raw("(id_propiedad IS NOT NULL)"))
+  @@index([empresa, id_vehiculo], map: "inclusiones_vehiculo", where: raw("(id_vehiculo IS NOT NULL)"))
+  @@schema("cys")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model obligacion_movimientos {
+  id            BigInt       @id @default(autoincrement())
+  empresa       String       @db.VarChar(30)
+  id_obligacion BigInt
+  tipo          String       @db.VarChar(12)
+  monto         Decimal      @db.Decimal(18, 2)
+  fecha         DateTime     @db.Date
+  motivo        String?
+  creado_en     DateTime     @default(now()) @db.Timestamptz(6)
+  creado_por    Int
+  app_usuarios  app_usuarios @relation(fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  obligaciones  obligaciones @relation(fields: [empresa, id_obligacion], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([empresa, id])
+  @@index([id_obligacion], map: "obligacion_movimientos_obligacion")
+  @@schema("cys")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model obligaciones {
+  id                     BigInt                   @id @default(autoincrement())
+  empresa                String                   @db.VarChar(30)
+  naturaleza             String                   @db.VarChar(10)
+  concepto               String                   @db.VarChar(20)
+  id_contraparte         BigInt
+  id_periodo             BigInt?                  @unique(map: "obligaciones_prima_periodo", where: raw("(((concepto)::text = 'prima'::text) AND ((estado)::text = 'vigente'::text))"))
+  id_endoso              BigInt?                  @unique(map: "obligaciones_endoso", where: raw("((id_endoso IS NOT NULL) AND ((estado)::text = 'vigente'::text))"))
+  moneda                 String                   @db.Char(3)
+  fecha_emision          DateTime                 @db.Date
+  fecha_vencimiento      DateTime                 @db.Date
+  documento              String?                  @db.VarChar(60)
+  descripcion            String
+  estado                 String                   @default("vigente") @db.VarChar(10)
+  creado_en              DateTime                 @default(now()) @db.Timestamptz(6)
+  creado_por             Int
+  imputaciones           imputaciones[]
+  obligacion_movimientos obligacion_movimientos[]
+  app_usuarios           app_usuarios             @relation(fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  app_empresas           app_empresas             @relation(fields: [empresa], references: [codigo], onDelete: NoAction)
+  partes                 partes                   @relation(fields: [empresa, id_contraparte], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  endosos                endosos?                 @relation(fields: [empresa, id_endoso], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  poliza_periodos        poliza_periodos?         @relation(fields: [empresa, id_periodo], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([empresa, id])
+  @@index([empresa, naturaleza, fecha_vencimiento], map: "obligaciones_vencimiento")
+  @@schema("cys")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model pagos {
+  id                                           BigInt         @id @default(autoincrement())
+  empresa                                      String         @db.VarChar(30)
+  sentido                                      String         @db.VarChar(8)
+  fecha                                        DateTime       @db.Date
+  monto                                        Decimal        @db.Decimal(18, 2)
+  moneda                                       String         @db.Char(3)
+  referencia                                   String?        @db.VarChar(80)
+  id_contraparte                               BigInt
+  observaciones                                String?
+  estado                                       String         @default("vigente") @db.VarChar(10)
+  anulado_por                                  Int?
+  anulado_en                                   DateTime?      @db.Timestamptz(6)
+  motivo_anulacion                             String?
+  creado_en                                    DateTime       @default(now()) @db.Timestamptz(6)
+  creado_por                                   Int
+  imputaciones                                 imputaciones[]
+  app_usuarios_pagos_anulado_porToapp_usuarios app_usuarios?  @relation("pagos_anulado_porToapp_usuarios", fields: [anulado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  app_usuarios_pagos_creado_porToapp_usuarios  app_usuarios   @relation("pagos_creado_porToapp_usuarios", fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  app_empresas                                 app_empresas   @relation(fields: [empresa], references: [codigo], onDelete: NoAction)
+  partes                                       partes         @relation(fields: [empresa, id_contraparte], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([empresa, id])
+  @@schema("cys")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This table contains exclusion constraints and requires additional setup for migrations. Visit https://pris.ly/d/exclusion-constraints for more info.
+model periodo_partes {
+  id              BigInt          @id @default(autoincrement())
+  empresa         String          @db.VarChar(30)
+  id_periodo      BigInt
+  rol             String          @db.VarChar(12)
+  id_parte        BigInt
+  desde           DateTime        @db.Date
+  hasta           DateTime?       @db.Date
+  id_endoso       BigInt?
+  creado_en       DateTime        @default(now()) @db.Timestamptz(6)
+  creado_por      Int
+  app_usuarios    app_usuarios    @relation(fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  endosos         endosos?        @relation(fields: [empresa, id_endoso], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  partes          partes          @relation(fields: [empresa, id_parte], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  poliza_periodos poliza_periodos @relation(fields: [empresa, id_periodo], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([empresa, id])
+  @@schema("cys")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model periodo_tarifas {
+  id              BigInt          @id @default(autoincrement())
+  empresa         String          @db.VarChar(30)
+  id_periodo      BigInt
+  id_cobertura    Int
+  clase           String?         @db.VarChar(120)
+  tasa            Decimal?        @db.Decimal(18, 8)
+  prima_fija      Decimal?        @db.Decimal(18, 2)
+  creado_en       DateTime        @default(now()) @db.Timestamptz(6)
+  creado_por      Int
+  app_usuarios    app_usuarios    @relation(fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  poliza_periodos poliza_periodos @relation(fields: [empresa, id_periodo], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  coberturas      coberturas      @relation(fields: [id_cobertura], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([empresa, id])
+  @@schema("cys")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This table contains exclusion constraints and requires additional setup for migrations. Visit https://pris.ly/d/exclusion-constraints for more info.
+model poliza_periodos {
+  id                                                        BigInt            @id @default(autoincrement())
+  empresa                                                   String            @db.VarChar(30)
+  id_poliza                                                 BigInt
+  numero_periodo                                            Int               @db.SmallInt
+  vigencia_desde                                            DateTime          @db.Date
+  vigencia_hasta                                            DateTime          @db.Date
+  moneda                                                    String            @db.Char(3)
+  id_periodo_anterior                                       BigInt?           @unique(map: "periodos_una_renovacion", where: raw("((id_periodo_anterior IS NOT NULL) AND ((estado)::text <> 'anulado'::text))"))
+  estado                                                    String            @default("borrador") @db.VarChar(10)
+  confirmado_por                                            Int?
+  confirmado_en                                             DateTime?         @db.Timestamptz(6)
+  observaciones                                             String?
+  creado_en                                                 DateTime          @default(now()) @db.Timestamptz(6)
+  creado_por                                                Int
+  endosos                                                   endosos[]
+  inclusiones                                               inclusiones[]
+  obligaciones                                              obligaciones[]
+  periodo_partes                                            periodo_partes[]
+  periodo_tarifas                                           periodo_tarifas[]
+  app_usuarios_poliza_periodos_confirmado_porToapp_usuarios app_usuarios?     @relation("poliza_periodos_confirmado_porToapp_usuarios", fields: [confirmado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  app_usuarios_poliza_periodos_creado_porToapp_usuarios     app_usuarios      @relation("poliza_periodos_creado_porToapp_usuarios", fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  poliza_periodos                                           poliza_periodos?  @relation("poliza_periodosTopoliza_periodos", fields: [empresa, id_periodo_anterior], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  other_poliza_periodos                                     poliza_periodos[]  @relation("poliza_periodosTopoliza_periodos")
+  polizas                                                   polizas           @relation(fields: [empresa, id_poliza], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([empresa, id])
+  @@unique([id_poliza, numero_periodo])
+  @@index([empresa, vigencia_hasta], map: "periodos_vencimiento", where: raw("((estado)::text = 'confirmado'::text)"))
+  @@schema("cys")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model polizas {
+  id                                                 BigInt            @id @default(autoincrement())
+  empresa                                            String            @db.VarChar(30)
+  id_aseguradora                                     BigInt
+  numero                                             String            @db.VarChar(40)
+  id_ramo                                            Int
+  descripcion                                        String?
+  estado                                             String            @default("activa") @db.VarChar(10)
+  creado_en                                          DateTime          @default(now()) @db.Timestamptz(6)
+  creado_por                                         Int
+  actualizado_en                                     DateTime          @default(now()) @db.Timestamptz(6)
+  actualizado_por                                    Int?
+  documentos                                         documentos[]
+  poliza_periodos                                    poliza_periodos[]
+  app_usuarios_polizas_actualizado_porToapp_usuarios app_usuarios?     @relation("polizas_actualizado_porToapp_usuarios", fields: [actualizado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  app_usuarios_polizas_creado_porToapp_usuarios      app_usuarios      @relation("polizas_creado_porToapp_usuarios", fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  app_empresas                                       app_empresas      @relation(fields: [empresa], references: [codigo], onDelete: NoAction)
+  partes                                             partes            @relation(fields: [empresa, id_aseguradora], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  ramos                                              ramos             @relation(fields: [id_ramo], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reglas_calculo                                     reglas_calculo[]
+
+  @@unique([empresa, id])
+  @@schema("cys")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model ramos {
+  id             Int              @id @default(autoincrement())
+  nombre         String           @unique @db.VarChar(120)
+  sujeto         String           @db.VarChar(10)
+  activo         Boolean          @default(true)
+  coberturas     coberturas[]
+  polizas        polizas[]
+  reglas_calculo reglas_calculo[]
+
+  @@schema("cys")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model reglas_calculo {
+  id                   Int              @id @default(autoincrement())
+  nombre               String           @db.VarChar(150)
+  tipo                 String           @db.VarChar(15)
+  empresa              String?          @db.VarChar(30)
+  id_aseguradora       BigInt?
+  id_poliza            BigInt?
+  id_ramo              Int?
+  id_cobertura         Int?
+  expresion            String?
+  evento               String?          @db.VarChar(12)
+  metodo               String?          @db.VarChar(20)
+  base_dias            Int?             @db.SmallInt
+  decimales            Int              @default(2) @db.SmallInt
+  estado               String           @default("propuesta") @db.VarChar(10)
+  version              Int              @default(1)
+  id_regla_anterior    Int?
+  vigente_desde        DateTime         @default(dbgenerated("'2000-01-01'::date")) @db.Date
+  vigente_hasta        DateTime?        @db.Date
+  descripcion          String?
+  creado_en            DateTime         @default(now()) @db.Timestamptz(6)
+  creado_por           Int?
+  calculos             calculos[]
+  endoso_lineas        endoso_lineas[]
+  app_usuarios         app_usuarios?    @relation(fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  app_empresas         app_empresas?    @relation(fields: [empresa], references: [codigo], onDelete: NoAction)
+  partes               partes?          @relation(fields: [empresa, id_aseguradora], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  polizas              polizas?         @relation(fields: [empresa, id_poliza], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  coberturas           coberturas?      @relation(fields: [id_cobertura], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ramos                ramos?           @relation(fields: [id_ramo], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reglas_calculo       reglas_calculo?  @relation("reglas_calculoToreglas_calculo", fields: [id_regla_anterior], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_reglas_calculo reglas_calculo[] @relation("reglas_calculoToreglas_calculo")
+
+  @@unique([nombre, version], map: "reglas_nombre_version")
+  @@schema("cys")
+}

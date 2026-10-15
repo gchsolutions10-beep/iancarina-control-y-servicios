@@ -24,9 +24,11 @@ type Props = {
   variante?: "primario" | "secundario";
   /** Para formularios con archivos. */
   archivos?: boolean;
+  /** Varios botones (p. ej. «Simular» y «Confirmar»): cada uno envía su `nombre=valor`. Reemplaza a `boton`. */
+  botones?: { nombre: string; valor: string; texto: string; variante?: "primario" | "secundario" }[];
 };
 
-export function FormularioAccion({ accion, boton = "Guardar", ocultos, className, children, variante = "primario", archivos }: Props) {
+export function FormularioAccion({ accion, boton = "Guardar", ocultos, className, children, variante = "primario", archivos, botones }: Props) {
   const [estado, enviar, pendiente] = useActionState(accion, null);
   return (
     <form onSubmit={enviarSinReiniciar(enviar)} encType={archivos ? "multipart/form-data" : undefined} className={cn("flex flex-col gap-4", className)}>
@@ -34,13 +36,23 @@ export function FormularioAccion({ accion, boton = "Guardar", ocultos, className
       <Errores.Provider value={estado?.errores ?? {}}>{children}</Errores.Provider>
       <div aria-live="polite" className="empty:hidden">
         {estado?.error && <MensajeEstado tipo="error">{estado.error}</MensajeEstado>}
+        {estado?.aviso && <p className="rounded-lg border border-borde-fuerte bg-superficie-2 px-3 py-2 text-sm whitespace-pre-line text-tinta animate-entrada">{estado.aviso}</p>}
         {estado?.ok && estado.mensaje && <MensajeEstado tipo="exito">{estado.mensaje}</MensajeEstado>}
       </div>
-      <div>
-        <button type="submit" disabled={pendiente} className={claseBoton(variante, "lg")}>
-          {pendiente ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : <Save className="size-4" aria-hidden />}
-          {boton}
-        </button>
+      <div className="flex flex-wrap gap-2">
+        {botones ? (
+          botones.map((b) => (
+            <button key={b.valor} type="submit" name={b.nombre} value={b.valor} disabled={pendiente} className={claseBoton(b.variante ?? "primario", "lg")}>
+              {pendiente && <LoaderCircle className="size-4 animate-spin" aria-hidden />}
+              {b.texto}
+            </button>
+          ))
+        ) : (
+          <button type="submit" disabled={pendiente} className={claseBoton(variante, "lg")}>
+            {pendiente ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : <Save className="size-4" aria-hidden />}
+            {boton}
+          </button>
+        )}
       </div>
     </form>
   );
@@ -106,7 +118,7 @@ export function AreaTexto({ valor, ...p }: Base & { valor?: string | null }) {
   );
 }
 
-export function Casilla({ nombre, etiqueta, valor, valorCasilla = "on" }: { nombre: string; etiqueta: string; valor?: boolean; valorCasilla?: string }) {
+export function Casilla({ nombre, etiqueta, valor, valorCasilla = "on" }: { nombre: string; etiqueta: ReactNode; valor?: boolean; valorCasilla?: string }) {
   return (
     <label className="flex items-center gap-2 text-sm text-tinta">
       <input type="checkbox" name={nombre} value={valorCasilla} defaultChecked={valor} className="size-4 accent-marca-600" />

@@ -47,6 +47,12 @@ tocar código. Lo ya calculado conserva la versión con que se calculó.
 | Riesgos diversos | Límite anual agregado + límite por vehículo; consume el **monto reconocido**; aviso al superar 80 % y bloqueo al 100 % |
 | Tasa promedio | Ponderada: Σ primas ÷ Σ sumas aseguradas |
 
+**Aplicada en la Etapa 3:** las fórmulas y prorrateos están en Configuración → Reglas (estado
+«Propuesta»); las tasas y primas fijas se cargan en las **tarifas de cada período** porque son del
+contrato y cambian cada año (no se cargó ninguna). Sin aditamentos declarados cuentan 0. La
+devolución por baja queda como obligación **por cobrar** a la aseguradora (no se descuenta sola de la
+prima pendiente). La cancelación total con tabla de corto plazo no está implementada aún.
+
 Siguen valiendo dos reglas: el importe confirmado por la aseguradora siempre puede reemplazar al
 calculado (con motivo y bitácora), y nada se convierte entre monedas.
 
