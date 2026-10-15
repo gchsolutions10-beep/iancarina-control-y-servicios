@@ -21,18 +21,17 @@ Esquema PostgreSQL: `cys` (nombre por confirmar). Tablas del sistema base con pr
 > **Implementado en la Etapa 2 (migración 002):** D1 se simplificó a **una sola tabla `partes`**
 > (naturales y jurídicas) con restricciones `CHECK` por tipo, en vez de tres tablas: misma
 > integridad (una sola llave foránea para todos los roles), menos uniones. Todas las tablas llevan
-> `empresa` y llaves compuestas `(empresa, id)`; las organizaciones (aseguradoras, talleres…) son
+> `empresa` y llaves compuestas `(empresa, id)`. **Sin relaciones persona–empresa** (socios): retiradas en
+> la migración 003 por pedido del cliente; las organizaciones (aseguradoras, talleres…) son
 > partes jurídicas con `funciones`. Catálogos simples en `catalogo_valores`; marcas y modelos aparte.
 
 ## 2. Diagrama general
 
 ```mermaid
 erDiagram
-    EMPRESAS ||--o{ PERSONA_EMPRESA_RELACIONES : "socios / propietarios"
     PARTES ||--o| PERSONAS : "natural"
     PARTES ||--o| ORGANIZACIONES : "jurídica"
     ORGANIZACIONES ||--o| EMPRESAS : "filial del grupo"
-    PERSONAS ||--o{ PERSONA_EMPRESA_RELACIONES : ""
     EMPRESAS ||--o{ VEHICULOS : "responsable"
     EMPRESAS ||--o{ PROPIEDADES : ""
     VEHICULOS ||--o{ TITULARIDADES : "propietario / responsable"
@@ -109,7 +108,6 @@ Columnas comunes a toda tabla de negocio (no se repiten abajo): `id bigint ident
 | `organizaciones` | `id_parte` PK, `tipo_parte='juridica'`, `identificacion_fiscal`, `razon_social`, `nombre_comercial` | mismo patrón; único parcial por identificación fiscal |
 | `organizacion_funciones` | (organización, función: `aseguradora`, `corredor`, `taller`, `transportista`, `proveedor`) | PK compuesta; una organización puede tener varias |
 | `empresas` | `id_parte` único → organizaciones, `id_empresa_matriz`, `activa` | Frontera de datos (tenant) |
-| `persona_empresa_relaciones` | persona, empresa, `id_tipo_relacion` (catálogo: socio, accionista, propietario…), `porcentaje` (opcional), `desde`, `hasta`, `estado`, observaciones | `EXCLUDE USING gist` para no solapar la misma relación en el tiempo |
 | `fusiones_personas` | origen, destino, motivo, usuario, fecha, `foto_origen jsonb`, filas reapuntadas `jsonb` | Procedimiento de consolidación (§5.1) |
 
 ### 3.3 Activos
@@ -150,9 +148,7 @@ motivos de alta/baja. Nunca se borran valores en uso: se desactivan.
 | `endosos` | período, `tipo`, `fecha_efectiva`, `estado`, `numero_aseguradora`, `prima_estimada`, `prima_confirmada`, `id_calculo`, `retroactivo`, motivo | Confirmar exige importe de la aseguradora o regla completa |
 
 Una persona con varias pólizas = varias `inclusiones` con su `id_persona`. Una póliza con varias
-personas = un período con varias `inclusiones`. Socio y asegurado = una fila en
-`persona_empresa_relaciones` y otra en `inclusiones`, sobre la misma `personas.id_parte`, sin que una
-implique la otra.
+personas = un período con varias `inclusiones`. Un socio asegurado es simplemente una persona con su fila en `inclusiones`.
 
 ### 3.6 Motor de cálculo y límites
 

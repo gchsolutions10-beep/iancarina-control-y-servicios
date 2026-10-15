@@ -2,7 +2,7 @@ import { z } from "zod";
 import { fechaOpcional, numeroOpcional, textoOpcional } from "./comunes";
 
 /**
- * Validaciones de las fichas de la Etapa 2 (personas, relaciones, vehículos, propiedades).
+ * Validaciones de las fichas de la Etapa 2 (personas, vehículos, propiedades).
  * Compartidas por las acciones; lógica pura probada en tests/fichas.test.ts.
  */
 
@@ -69,16 +69,6 @@ export function enmascarar<T extends Record<string, unknown>>(parte: T, puedeVer
   for (const c of CAMPOS_SENSIBLES) if (copia[c] !== null && copia[c] !== undefined) copia[c] = "•••";
   return copia as T;
 }
-
-export const relacionSchema = z
-  .object({
-    tipo_relacion: obligatorio("el tipo de relación"),
-    porcentaje: numeroOpcional({ min: 0.0001, max: 100 }),
-    desde: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha de inicio no válida"),
-    hasta: fechaOpcional,
-    observaciones: textoOpcional(1000),
-  })
-  .refine((d) => !d.hasta || d.hasta >= d.desde, { path: ["hasta"], message: "Debe ser igual o posterior al inicio" });
 
 const anioActual = new Date().getFullYear();
 

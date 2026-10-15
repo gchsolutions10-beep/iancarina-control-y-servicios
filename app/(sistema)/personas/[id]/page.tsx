@@ -1,19 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { agregarRelacion, cerrarRelacion } from "@/actions/personas";
 import { AyudaModulo } from "@/components/ayuda/ayuda-modulo";
 import { SeccionDocumentos } from "@/components/fichas/documentos";
 import { FormularioParte } from "@/components/fichas/formulario-parte";
 import { Historial } from "@/components/fichas/historial";
 import { Datos, Encabezado, Insignia, Tabla } from "@/components/fichas/piezas";
 import { Seccion } from "@/components/formularios/controles";
-import { AreaTexto, Entrada, FormularioAccion, Numero, Seleccion } from "@/components/formularios/formulario-accion";
 import { MensajeEstado } from "@/components/ui/campo";
 import { requerirSesion, tienePermiso } from "@/lib/auth/dal";
 import { guia } from "@/lib/ayuda/guias";
 import { nombresEmpresas } from "@/lib/empresas";
-import { documentosDe, historialDe, obtenerParte, relacionesDeParte, titularidades, valoresCatalogo } from "@/lib/fichas/datos";
+import { documentosDe, historialDe, obtenerParte, titularidades, valoresCatalogo } from "@/lib/fichas/datos";
 import { enmascarar, ROLES_TITULAR } from "@/lib/validations/fichas";
 
 export const metadata: Metadata = { title: "Ficha" };
@@ -30,12 +28,10 @@ export default async function FichaParte({ params, searchParams }: PageProps<"/p
   const p = enmascarar(bruta, sensibles);
   const natural = p.tipo === "natural";
 
-  const [relaciones, bienes, documentos, historial, tiposRelacion, tiposId, funciones, tiposDoc, nombres] = await Promise.all([
-    relacionesDeParte(empresa, id),
+  const [bienes, documentos, historial, tiposId, funciones, tiposDoc, nombres] = await Promise.all([
     titularidades(empresa, { parte: id }),
     documentosDe(empresa, { tipo: "parte", id }, sensibles),
     historialDe(empresa, "partes", id),
-    valoresCatalogo("tipo_relacion"),
     valoresCatalogo("tipo_identificacion"),
     valoresCatalogo("funcion_organizacion"),
     valoresCatalogo("tipo_documento"),
@@ -54,7 +50,7 @@ export default async function FichaParte({ params, searchParams }: PageProps<"/p
       />
       {creada && (
         <div className="mb-4">
-          <MensajeEstado tipo="exito">Ficha creada. Ahora puedes agregar sus relaciones con la empresa y sus documentos.</MensajeEstado>
+          <MensajeEstado tipo="exito">Ficha creada. Ahora puedes agregar sus documentos.</MensajeEstado>
         </div>
       )}
       <div className="flex flex-col gap-6">
@@ -80,45 +76,6 @@ export default async function FichaParte({ params, searchParams }: PageProps<"/p
           )}
         </Seccion>
 
-        <Seccion titulo="Relación con la empresa" descripcion="Socio, accionista, propietario… Ser socio no la hace asegurada: eso se indica en cada póliza.">
-          <Tabla
-            columnas={["Relación", "Porcentaje", "Desde", "Hasta", "Estado", ...(registrar ? [""] : [])]}
-            vacio="Sin relaciones registradas."
-            filas={relaciones.map((r) => [
-              r.tipo_relacion,
-              r.porcentaje ? `${Number(r.porcentaje).toLocaleString("es-VE")} %` : "—",
-              r.desde,
-              r.hasta ?? "—",
-              <Insignia key="e" estado={r.hasta ? "terminada" : "vigente"} />,
-              ...(registrar
-                ? [
-                    r.hasta ? null : (
-                      <details key="c">
-                        <summary className="cursor-pointer text-xs text-tinta-suave hover:text-tinta">Terminar</summary>
-                        <FormularioAccion accion={cerrarRelacion} boton="Terminar relación" variante="secundario" ocultos={{ id_relacion: String(r.id) }} className="mt-2">
-                          <Entrada nombre="hasta" etiqueta="Fecha de fin" tipo="date" />
-                        </FormularioAccion>
-                      </details>
-                    ),
-                  ]
-                : []),
-            ])}
-          />
-          {registrar && (
-            <details className="mt-4 rounded-lg border border-borde p-4">
-              <summary className="cursor-pointer text-sm font-medium text-tinta">Agregar relación</summary>
-              <FormularioAccion accion={agregarRelacion} boton="Agregar relación" ocultos={{ id_parte: String(id) }} className="mt-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Seleccion nombre="tipo_relacion" etiqueta="Relación" opciones={tiposRelacion} />
-                  <Numero nombre="porcentaje" etiqueta="Porcentaje (opcional)" />
-                  <Entrada nombre="desde" etiqueta="Desde" tipo="date" />
-                  <Entrada nombre="hasta" etiqueta="Hasta (opcional)" tipo="date" />
-                </div>
-                <AreaTexto nombre="observaciones" etiqueta="Observaciones" />
-              </FormularioAccion>
-            </details>
-          )}
-        </Seccion>
 
         <Seccion titulo="Vehículos y propiedades" descripcion="Activos donde figura como propietario legal o responsable administrativo.">
           <Tabla

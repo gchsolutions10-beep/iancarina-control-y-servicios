@@ -7,7 +7,6 @@ import {
   FileSpreadsheet,
   FileText,
   HandCoins,
-  Handshake,
   LayoutDashboard,
   RefreshCcw,
   Truck,
@@ -52,8 +51,7 @@ export const AREAS: Area[] = [
       {
         nombre: "Personas",
         modulos: [
-          { id: "personas", nombre: "Fichas de personas", descripcion: "Socios, propietarios, asegurados y beneficiarios, con su historial", icono: Users, permiso: "seguros.ver", origen: "cys.personas", ruta: "/personas/fichas" },
-          { id: "relaciones-empresa", nombre: "Socios y propietarios", descripcion: "Relación de cada persona con las empresas, con fechas", icono: Handshake, permiso: "seguros.ver", origen: "cys.persona_empresa_relaciones", ruta: "/personas/socios" },
+          { id: "personas", nombre: "Fichas de personas", descripcion: "Asegurados, beneficiarios, propietarios y organizaciones, con su historial", icono: Users, permiso: "seguros.ver", origen: "cys.personas", ruta: "/personas/fichas" },
         ],
       },
     ],

@@ -99,7 +99,7 @@ pendientes, cómo comprobarlo y siguiente paso.
   enmascarado de datos personales, filtros de reportes, detección de tipo de archivo.
 - **Base de datos** (`npm run test:bd`, PostgreSQL desechable; en CI con un contenedor de servicio):
   migraciones sobre base nueva, restricciones (`num_nonnulls`, `EXCLUDE`, llaves), los 21 casos del
-  requerimiento con datos sintéticos (persona con varias pólizas, póliza con varias personas, socio y
+  requerimiento con datos sintéticos (persona con varias pólizas, póliza con varias personas, persona
   asegurado, cambio de asegurado sin perder histórico, venta y exclusión, pagos parciales, separación
   de empresas, acceso no autorizado, etc.), y que los reportes cuadren con los movimientos.
 - **Almacenamiento**: el mismo juego de pruebas corre contra el adaptador de carpeta (directorio

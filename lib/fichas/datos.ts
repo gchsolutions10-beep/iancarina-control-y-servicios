@@ -91,11 +91,6 @@ export async function partesParecidas(empresa: string, nombre: string, excluir?:
   return filas.map((f) => ({ ...f, id: n(f.id) }));
 }
 
-export async function relacionesDeParte(empresa: string, idParte: number) {
-  const filas = await db.relaciones_empresa.findMany({ where: { empresa, id_parte: BigInt(idParte) }, orderBy: [{ hasta: { sort: "asc", nulls: "first" } }, { desde: "desc" }] });
-  return filas.map((r) => ({ id: n(r.id), tipo_relacion: r.tipo_relacion, porcentaje: r.porcentaje?.toString() ?? null, desde: aFecha(r.desde)!, hasta: aFecha(r.hasta), observaciones: r.observaciones }));
-}
-
 // ---------------------------------------------------------------- titularidades
 export async function titularidades(empresa: string, ficha: { vehiculo?: number; propiedad?: number; parte?: number }) {
   const filas = await db.titularidades.findMany({

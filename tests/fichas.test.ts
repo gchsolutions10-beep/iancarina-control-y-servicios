@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { detectarTipo, nombreSeguro } from "../lib/archivos/tipos";
-import { cierreTitularidad, enmascarar, nombreParte, normalizarCodigo, parteSchema, propiedadSchema, relacionSchema, vehiculoSchema } from "../lib/validations/fichas";
+import { cierreTitularidad, enmascarar, nombreParte, normalizarCodigo, parteSchema, propiedadSchema, vehiculoSchema } from "../lib/validations/fichas";
 
 const base = { tipo_identificacion: "V", numero_identificacion: "12.345.678", nombres: "ANA", apellidos: "PÉREZ", razon_social: "", funciones: [], fecha_nacimiento: "", telefono: "", correo: "", direccion: "", observaciones: "" };
 
@@ -35,9 +35,7 @@ test("el nuevo titular cierra al anterior el día previo y no puede empezar ante
   assert.equal(cierreTitularidad("2024-01-10", "2024-01-10").ok, false);
 });
 
-test("relación: el fin no puede ser anterior al inicio; vehículo y propiedad validan sus campos", () => {
-  assert.ok(!relacionSchema.safeParse({ tipo_relacion: "Socio", porcentaje: "", desde: "2025-01-01", hasta: "2024-12-31", observaciones: "" }).success);
-  assert.ok(relacionSchema.safeParse({ tipo_relacion: "Socio", porcentaje: "33,5", desde: "2025-01-01", hasta: "", observaciones: "" }).success);
+test("vehículo y propiedad validan sus campos", () => {
   const v = { origen: "propio", placa: "ab123cd", id_modelo: "", anio: "2020", tm: "", color: "", tipo_vehiculo: "", clasificacion_chuto: "", tiene_batea: false, fecha_adquisicion: "", observaciones: "" };
   const r = vehiculoSchema.safeParse(v);
   assert.ok(r.success && r.data.placa === "AB123CD");

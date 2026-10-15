@@ -9,7 +9,7 @@ import type { EstadoAccion } from "@/lib/estado-accion";
 import { codigoPg, sinPermiso } from "@/lib/fichas/acceso";
 import { partesParecidas } from "@/lib/fichas/datos";
 import { erroresDeZod } from "@/lib/validations/comunes";
-import { CAMPOS_SENSIBLES, nombreParte, normalizarCodigo, parteSchema, relacionSchema } from "@/lib/validations/fichas";
+import { CAMPOS_SENSIBLES, nombreParte, normalizarCodigo, parteSchema } from "@/lib/validations/fichas";
 
 const MODULO = "PERSONAS";
 const texto = (fd: FormData, campo: string) => String(fd.get(campo) ?? "");
@@ -98,74 +98,3 @@ export async function guardarParte(_previo: EstadoAccion, fd: FormData): Promise
   return { ok: true, mensaje: "Cambios guardados." };
 }
 
-/** Agrega una relación con la empresa (socio, accionista…). Nunca solapa la misma relación en el tiempo. */
-export async function agregarRelacion(_previo: EstadoAccion, fd: FormData): Promise<EstadoAccion> {
-  const usuario = await requerirSesion();
-  const idParte = Number(texto(fd, "id_parte"));
-  const parte = await db.partes.findUnique({ where: { id: BigInt(idParte) }, select: { empresa: true, estado: true } });
-  if (!parte) return { error: "La ficha ya no existe." };
-  const negado = sinPermiso(usuario, parte.empresa, "seguros.registrar");
-  if (negado) return { error: negado };
-  const entrada = relacionSchema.safeParse({
-    tipo_relacion: texto(fd, "tipo_relacion"),
-    porcentaje: texto(fd, "porcentaje"),
-    desde: texto(fd, "desde"),
-    hasta: texto(fd, "hasta"),
-    observaciones: texto(fd, "observaciones"),
-  });
-  if (!entrada.success) return { error: "Revisa los campos marcados.", errores: erroresDeZod(entrada.error) };
-  const d = entrada.data;
-  try {
-    await db.$transaction(async (tx) => {
-      const r = await tx.relaciones_empresa.create({
-        data: {
-          empresa: parte.empresa,
-          id_parte: BigInt(idParte),
-          tipo_relacion: d.tipo_relacion,
-          porcentaje: d.porcentaje,
-          desde: new Date(`${d.desde}T00:00:00Z`),
-          hasta: d.hasta ? new Date(`${d.hasta}T00:00:00Z`) : null,
-          observaciones: d.observaciones,
-          creado_por: usuario.id,
-        },
-      });
-      await registrarGestion(
-        usuario.id,
-        MODULO,
-        `ID ${idParte} | RELACIÓN ${r.id}: ${d.tipo_relacion}${d.porcentaje ? ` ${d.porcentaje} %` : ""} desde ${d.desde}${d.hasta ? ` hasta ${d.hasta}` : ""}`,
-        tx,
-        { empresa: parte.empresa, entidad: "partes", idRegistro: idParte, operacion: "RELACION" },
-      );
-    });
-  } catch (error) {
-    if (codigoPg(error) === "23P01") return { error: "Ya tiene esa relación en un período que se cruza con estas fechas." };
-    console.error("[agregarRelacion]", error);
-    return { error: "No se pudo guardar. Intenta de nuevo." };
-  }
-  revalidatePath(`/personas/${idParte}`);
-  return { ok: true, mensaje: "Relación registrada." };
-}
-
-/** Termina una relación vigente con fecha (no se borra: queda en el historial). */
-export async function cerrarRelacion(_previo: EstadoAccion, fd: FormData): Promise<EstadoAccion> {
-  const usuario = await requerirSesion();
-  const rel = await db.relaciones_empresa.findUnique({ where: { id: BigInt(Number(texto(fd, "id_relacion"))) } });
-  if (!rel) return { error: "La relación ya no existe." };
-  const negado = sinPermiso(usuario, rel.empresa, "seguros.registrar");
-  if (negado) return { error: negado };
-  const hasta = texto(fd, "hasta");
-  const desde = rel.desde.toISOString().slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(hasta) || hasta < desde) return { error: `Indica una fecha de fin igual o posterior al ${desde}.`, errores: { hasta: "Fecha no válida" } };
-  if (rel.hasta) return { error: "La relación ya estaba terminada." };
-  await db.$transaction(async (tx) => {
-    await tx.relaciones_empresa.update({ where: { id: rel.id }, data: { hasta: new Date(`${hasta}T00:00:00Z`) } });
-    await registrarGestion(usuario.id, MODULO, `ID ${rel.id_parte} | RELACIÓN ${rel.id} (${rel.tipo_relacion}) TERMINADA el ${hasta}`, tx, {
-      empresa: rel.empresa,
-      entidad: "partes",
-      idRegistro: rel.id_parte,
-      operacion: "RELACION",
-    });
-  });
-  revalidatePath(`/personas/${rel.id_parte}`);
-  return { ok: true, mensaje: "Relación terminada." };
-}

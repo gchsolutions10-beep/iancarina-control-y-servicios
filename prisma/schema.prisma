@@ -177,7 +177,6 @@ model app_usuarios {
   partes_partes_creado_porToapp_usuarios                partes[]               @relation("partes_creado_porToapp_usuarios")
   propiedades_propiedades_actualizado_porToapp_usuarios propiedades[]          @relation("propiedades_actualizado_porToapp_usuarios")
   propiedades_propiedades_creado_porToapp_usuarios      propiedades[]          @relation("propiedades_creado_porToapp_usuarios")
-  relaciones_empresa                                    relaciones_empresa[]
   titularidades                                         titularidades[]
   vehiculos_vehiculos_actualizado_porToapp_usuarios     vehiculos[]            @relation("vehiculos_actualizado_porToapp_usuarios")
   vehiculos_vehiculos_creado_porToapp_usuarios          vehiculos[]            @relation("vehiculos_creado_porToapp_usuarios")
@@ -222,26 +221,24 @@ model catalogo_valores {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model documentos {
-  id                 BigInt              @id @default(autoincrement())
-  empresa            String              @db.VarChar(30)
-  id_archivo         String              @db.Uuid
-  tipo_documento     String              @db.VarChar(120)
-  descripcion        String?
-  fecha_documento    DateTime?           @db.Date
-  confidencial       Boolean             @default(false)
-  id_parte           BigInt?
-  id_vehiculo        BigInt?
-  id_propiedad       BigInt?
-  id_relacion        BigInt?
-  retirado           Boolean             @default(false)
-  creado_en          DateTime            @default(now()) @db.Timestamptz(6)
-  creado_por         Int
-  app_usuarios       app_usuarios        @relation(fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
-  archivos           archivos            @relation(fields: [empresa, id_archivo], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
-  partes             partes?             @relation(fields: [empresa, id_parte], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
-  propiedades        propiedades?        @relation(fields: [empresa, id_propiedad], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
-  relaciones_empresa relaciones_empresa? @relation(fields: [empresa, id_relacion], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
-  vehiculos          vehiculos?          @relation(fields: [empresa, id_vehiculo], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  id              BigInt       @id @default(autoincrement())
+  empresa         String       @db.VarChar(30)
+  id_archivo      String       @db.Uuid
+  tipo_documento  String       @db.VarChar(120)
+  descripcion     String?
+  fecha_documento DateTime?    @db.Date
+  confidencial    Boolean      @default(false)
+  id_parte        BigInt?
+  id_vehiculo     BigInt?
+  id_propiedad    BigInt?
+  retirado        Boolean      @default(false)
+  creado_en       DateTime     @default(now()) @db.Timestamptz(6)
+  creado_por      Int
+  app_usuarios    app_usuarios @relation(fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  archivos        archivos     @relation(fields: [empresa, id_archivo], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  partes          partes?      @relation(fields: [empresa, id_parte], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  propiedades     propiedades? @relation(fields: [empresa, id_propiedad], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  vehiculos       vehiculos?   @relation(fields: [empresa, id_vehiculo], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([empresa, id])
   @@index([empresa, id_parte], map: "documentos_parte", where: raw("(id_parte IS NOT NULL)"))
@@ -274,36 +271,35 @@ model modelos {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model partes {
-  id                                                BigInt               @id @default(autoincrement())
-  empresa                                           String               @db.VarChar(30)
-  tipo                                              String               @db.VarChar(10)
-  tipo_identificacion                               String               @db.VarChar(5)
-  numero_identificacion                             String               @db.VarChar(30)
-  identificacion_normalizada                        String?              @default(dbgenerated("cys.normalizar_codigo(((tipo_identificacion)::text || (numero_identificacion)::text))"))
-  nombres                                           String?              @db.VarChar(120)
-  apellidos                                         String?              @db.VarChar(120)
-  razon_social                                      String?              @db.VarChar(200)
-  funciones                                         String[]             @default([])
-  fecha_nacimiento                                  DateTime?            @db.Date
-  telefono                                          String?              @db.VarChar(40)
-  correo                                            String?              @db.VarChar(120)
+  id                                                BigInt          @id @default(autoincrement())
+  empresa                                           String          @db.VarChar(30)
+  tipo                                              String          @db.VarChar(10)
+  tipo_identificacion                               String          @db.VarChar(5)
+  numero_identificacion                             String          @db.VarChar(30)
+  identificacion_normalizada                        String?         @default(dbgenerated("cys.normalizar_codigo(((tipo_identificacion)::text || (numero_identificacion)::text))"))
+  nombres                                           String?         @db.VarChar(120)
+  apellidos                                         String?         @db.VarChar(120)
+  razon_social                                      String?         @db.VarChar(200)
+  funciones                                         String[]        @default([])
+  fecha_nacimiento                                  DateTime?       @db.Date
+  telefono                                          String?         @db.VarChar(40)
+  correo                                            String?         @db.VarChar(120)
   direccion                                         String?
   observaciones                                     String?
-  id_foto                                           String?              @db.Uuid
-  estado                                            String               @default("activa") @db.VarChar(10)
+  id_foto                                           String?         @db.Uuid
+  estado                                            String          @default("activa") @db.VarChar(10)
   fusionada_en                                      BigInt?
-  creado_en                                         DateTime             @default(now()) @db.Timestamptz(6)
+  creado_en                                         DateTime        @default(now()) @db.Timestamptz(6)
   creado_por                                        Int
-  actualizado_en                                    DateTime             @default(now()) @db.Timestamptz(6)
+  actualizado_en                                    DateTime        @default(now()) @db.Timestamptz(6)
   actualizado_por                                   Int?
   documentos                                        documentos[]
-  app_usuarios_partes_actualizado_porToapp_usuarios app_usuarios?        @relation("partes_actualizado_porToapp_usuarios", fields: [actualizado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
-  app_usuarios_partes_creado_porToapp_usuarios      app_usuarios         @relation("partes_creado_porToapp_usuarios", fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
-  app_empresas                                      app_empresas         @relation(fields: [empresa], references: [codigo], onDelete: NoAction)
-  partes                                            partes?              @relation("partesTopartes", fields: [empresa, fusionada_en], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
-  other_partes                                      partes[]             @relation("partesTopartes")
-  archivos                                          archivos?            @relation(fields: [empresa, id_foto], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
-  relaciones_empresa                                relaciones_empresa[]
+  app_usuarios_partes_actualizado_porToapp_usuarios app_usuarios?   @relation("partes_actualizado_porToapp_usuarios", fields: [actualizado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  app_usuarios_partes_creado_porToapp_usuarios      app_usuarios    @relation("partes_creado_porToapp_usuarios", fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  app_empresas                                      app_empresas    @relation(fields: [empresa], references: [codigo], onDelete: NoAction)
+  partes                                            partes?         @relation("partesTopartes", fields: [empresa, fusionada_en], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
+  other_partes                                      partes[]        @relation("partesTopartes")
+  archivos                                          archivos?       @relation(fields: [empresa, id_foto], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
   titularidades                                     titularidades[]
 
   @@unique([empresa, id])
@@ -335,27 +331,6 @@ model propiedades {
   app_empresas                                           app_empresas    @relation(fields: [empresa], references: [codigo], onDelete: NoAction)
   archivos                                               archivos?       @relation(fields: [empresa, id_foto], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
   titularidades                                          titularidades[]
-
-  @@unique([empresa, id])
-  @@schema("cys")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This table contains exclusion constraints and requires additional setup for migrations. Visit https://pris.ly/d/exclusion-constraints for more info.
-model relaciones_empresa {
-  id            BigInt       @id @default(autoincrement())
-  empresa       String       @db.VarChar(30)
-  id_parte      BigInt
-  tipo_relacion String       @db.VarChar(120)
-  porcentaje    Decimal?     @db.Decimal(7, 4)
-  desde         DateTime     @db.Date
-  hasta         DateTime?    @db.Date
-  observaciones String?
-  creado_en     DateTime     @default(now()) @db.Timestamptz(6)
-  creado_por    Int
-  documentos    documentos[]
-  app_usuarios  app_usuarios @relation(fields: [creado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
-  partes        partes       @relation(fields: [empresa, id_parte], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([empresa, id])
   @@schema("cys")

@@ -10,7 +10,7 @@ import { detectarTipo, nombreSeguro, TIPOS_PERMITIDOS } from "./tipos";
 
 /**
  * Dónde se guardan los archivos. La base solo guarda metadatos y una clave generada aquí.
- * - «nube»: Vercel Blob privado (demo). Requiere BLOB_READ_WRITE_TOKEN.
+ * - «nube»: Vercel Blob privado (demo). Requiere BLOB_STORE_ID (o BLOB_READ_WRITE_TOKEN).
  * - «carpeta»: carpeta compartida montada en el servidor (intranet). Requiere ARCHIVOS_RUTA_BASE.
  * ALMACEN fuerza uno; si falta, se usa la carpeta si hay ruta y si no, la nube si hay token.
  */
@@ -55,7 +55,8 @@ const carpeta: Almacen = {
 export function almacenActivo(): Almacen | null {
   const forzado = variable("ALMACEN");
   if (forzado === "carpeta" || (!forzado && variable("ARCHIVOS_RUTA_BASE"))) return variable("ARCHIVOS_RUTA_BASE") ? carpeta : null;
-  if (forzado === "nube" || !forzado) return variable("BLOB_READ_WRITE_TOKEN") ? nube : null;
+  // Vercel conecta el Blob con BLOB_STORE_ID (credencial OIDC automática) o, en tiendas antiguas, con un token.
+  if (forzado === "nube" || !forzado) return variable("BLOB_STORE_ID") || variable("BLOB_READ_WRITE_TOKEN") ? nube : null;
   return null;
 }
 

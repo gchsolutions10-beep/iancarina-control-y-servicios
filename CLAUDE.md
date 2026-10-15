@@ -2,7 +2,7 @@
 
 # Control de Seguros y Activos — Mary Iancarina, C.A.
 
-Sistema web para centralizar personas (socios, propietarios, asegurados), vehículos, propiedades,
+Sistema web para centralizar personas (asegurados, beneficiarios, propietarios), vehículos, propiedades,
 pólizas con sus vigencias, certificados y coberturas, renovaciones, siniestros, pagos de primas y
 cuentas por cobrar a las aseguradoras, con indicadores y reportes.
 Sistema **nuevo** (no reemplaza Access). Base PostgreSQL propia: Neon para la demo, servidor del
@@ -71,7 +71,7 @@ del sistema (login, usuarios, ajustes, componentes) se copió de ahí y ya no se
 - [x] Etapa 1: auditoría y diseño (`docs/PLAN.md`, `docs/MODELO-DATOS.md`, `docs/REGLAS-Y-PENDIENTES.md`)
 - [x] Base del sistema: login, empresas, usuarios con rol por empresa (analista/consulta), ajustes,
       menú por áreas, bitácora inmutable, tema, despliegue en Vercel + Neon (`docs/DESPLIEGUE.md`)
-- [x] Etapa 2: personas y empresas (`docs/modulos/personas.md`), socios, vehículos y propiedades con
+- [x] Etapa 2: personas y empresas (`docs/modulos/personas.md`; sin socios ni acciones), vehículos y propiedades con
       titulares y bajas, documentos y fotos en Blob privado / carpeta (`docs/modulos/activos.md`), catálogos
 - [ ] Etapa 2b: consolidar personas duplicadas (fusión) — cuando haya pólizas que reapuntar
 - [ ] Etapa 3: pólizas, motor de cálculo, renovaciones, altas/bajas, núcleo financiero de primas
