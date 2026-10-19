@@ -1,5 +1,6 @@
-import { PaginaArea } from "@/components/sistema/pagina-area";
+import { redirect } from "next/navigation";
 
-export default function AreaReportes() {
-  return <PaginaArea id="reportes" />;
+/** Las antiguas pestañas por área ahora están dentro de «Gestión de Pólizas». */
+export default function Pestana() {
+  redirect("/gestion-polizas");
 }

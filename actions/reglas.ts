@@ -66,17 +66,44 @@ export async function nuevaVersionRegla(_previo: EstadoAccion, fd: FormData): Pr
   return { ok: true, mensaje: "Nueva versión creada. Los cálculos anteriores conservan la versión con que se hicieron." };
 }
 
-/** Aprueba una regla propuesta (confirmada con el contrato) o la retira. */
+/**
+ * Aprueba una regla propuesta (confirmada con el contrato), la devuelve a «Propuesta» (aprobada por
+ * error) o la retira. El estado no cambia ningún importe: solo la marca que se muestra en los cálculos.
+ */
 export async function cambiarEstadoRegla(_previo: EstadoAccion, fd: FormData): Promise<EstadoAccion> {
   const u = await requerirSesion();
   if (!tienePermiso(u, "admin.sistema")) return { error: "Solo el administrador cambia las reglas de cálculo." };
   const r = await db.reglas_calculo.findUnique({ where: { id: Number(texto(fd, "id")) || 0 } });
   const estado = texto(fd, "estado");
-  if (!r || !["aprobada", "retirada"].includes(estado)) return { error: "Operación no válida." };
+  const permitido = { aprobada: ["propuesta"], propuesta: ["aprobada"], retirada: ["propuesta", "aprobada"] } as Record<string, string[]>;
+  if (!r || !permitido[estado]?.includes(r.estado)) return { error: "Operación no válida." };
   await db.$transaction(async (tx) => {
     await tx.reglas_calculo.update({ where: { id: r.id }, data: { estado } });
     await registrarGestion(u.id, "REGLAS", `REGLA «${r.nombre}» v${r.version}: ${r.estado.toUpperCase()} -> ${estado.toUpperCase()}`, tx, { entidad: "reglas_calculo", idRegistro: r.id, operacion: "ESTADO" });
   });
   revalidatePath(RUTA);
-  return { ok: true, mensaje: estado === "aprobada" ? "Regla aprobada." : "Regla retirada." };
+  return { ok: true, mensaje: estado === "aprobada" ? "Regla aprobada." : estado === "propuesta" ? "La regla volvió a «Propuesta»." : "Regla retirada." };
+}
+
+/**
+ * Deshace una versión creada por error que todavía no se usó: la retira (las reglas no se borran) y la
+ * versión anterior vuelve a valer sin fecha de fin. Si ya se usó en un cálculo, se corrige con otra versión.
+ */
+export async function deshacerVersionRegla(_previo: EstadoAccion, fd: FormData): Promise<EstadoAccion> {
+  const u = await requerirSesion();
+  if (!tienePermiso(u, "admin.sistema")) return { error: "Solo el administrador cambia las reglas de cálculo." };
+  const r = await db.reglas_calculo.findUnique({
+    where: { id: Number(texto(fd, "id")) || 0 },
+    include: { _count: { select: { calculos: true, endoso_lineas: true } }, reglas_calculo: true },
+  });
+  if (!r || !r.reglas_calculo || r.estado === "retirada" || r.vigente_hasta) return { error: "Solo se deshace la versión vigente más nueva de una regla." };
+  if (r._count.calculos + r._count.endoso_lineas > 0) return { error: "Esta versión ya se usó en cálculos: para corregirla, crea una versión nueva." };
+  const anterior = r.reglas_calculo;
+  await db.$transaction(async (tx) => {
+    await tx.reglas_calculo.update({ where: { id: r.id }, data: { estado: "retirada" } });
+    await tx.reglas_calculo.update({ where: { id: anterior.id }, data: { vigente_hasta: null } });
+    await registrarGestion(u.id, "REGLAS", `REGLA «${r.nombre}» v${r.version} DESHECHA (sin usos): vuelve a valer v${anterior.version}`, tx, { entidad: "reglas_calculo", idRegistro: r.id, operacion: "DESHACER" });
+  });
+  revalidatePath(RUTA);
+  return { ok: true, mensaje: `Versión deshecha: vuelve a valer la v${anterior.version} sin fecha de fin.` };
 }

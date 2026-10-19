@@ -9,14 +9,14 @@ const SECCIONES = [
   { href: "/admin/base-datos/sql", etiqueta: "Consola SQL" },
 ] as const;
 
-/** Encabezado y pestañas de Base de datos (solo administrador). */
+/** Encabezado y pestañas de Programador: la base de datos (solo administrador). */
 export function SubnavegacionBaseDatos({ actual }: { actual: (typeof SECCIONES)[number]["href"] }) {
   return (
     <>
       <header className="mb-4 flex items-start gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-tinta sm:text-3xl">Base de datos</h1>
-          <p className="mt-1 text-sm text-tinta-suave">Solo el administrador. Cada cambio queda en la bitácora (módulo «BASE DE DATOS»).</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-tinta sm:text-3xl">Programador</h1>
+          <p className="mt-1 text-sm text-tinta-suave">Base de datos: datos de ejemplo, limpieza, tablas y consola SQL. Solo el administrador; cada cambio queda en la bitácora (módulo «BASE DE DATOS»).</p>
         </div>
         <AyudaModulo guia={guia("base-datos")} />
       </header>

@@ -156,8 +156,11 @@ const lista: Guia[] = [
     pasos: [
       "Revise cada regla «Propuesta» contra el contrato o el cuadro de la aseguradora.",
       "Si coincide, pulse «Aprobar». Si no, cree una «Nueva versión» con la fórmula o el método correctos y la fecha desde la que vale.",
+      "¿Aprobó por error? Pulse «Volver a propuesta»: la regla recupera la marca «Propuesta».",
+      "¿Creó una versión por error y todavía no se usó en ningún cálculo? Pulse «Deshacer versión»: se retira y la versión anterior vuelve a valer sin fecha de fin.",
     ],
     tener: [
+      "«Aprobar» no cambia ningún importe: solo indica que la fórmula ya se verificó con el contrato y quita la marca «Propuesta» de los cálculos.",
       "Las tasas y primas fijas no van en las reglas: se cargan en las tarifas de cada período (cambian año a año).",
       "Lo ya calculado conserva la versión con que se calculó; la versión anterior sigue valiendo hasta el día previo.",
       "Gana la regla más específica (póliza › aseguradora › cobertura › ramo › general).",
@@ -166,7 +169,7 @@ const lista: Guia[] = [
   },
   {
     id: "base-datos",
-    titulo: "Base de datos",
+    titulo: "Programador (base de datos)",
     quien: "Solo el administrador.",
     para: "Cargar datos de ejemplo para presentar el sistema, dejarlo en blanco cuando haga falta y revisar o corregir registros con cuidado.",
     pasos: [
@@ -290,6 +293,26 @@ const lista: Guia[] = [
     ],
     evitar: ["No cambie el CECO en el Excel: el reparto debe salir del sistema para que cuadre con las pólizas."],
   },
+  {
+    id: "ajustes",
+    titulo: "Ajustes",
+    quien: "El administrador (y GCH para los ajustes técnicos).",
+    para: "Cambiar parámetros del sistema sin tocar el programa: plazos de «por vencer», días sin movimiento de un siniestro, aviso de límites y tamaño de archivos.",
+    pasos: ["Busque el parámetro en su grupo (Pólizas, Finanzas, Siniestros, Archivos).", "Cambie el valor y pulse «Guardar»: vale de inmediato para todos los usuarios."],
+    tener: ["Cada cambio queda en la bitácora con el valor anterior."],
+    evitar: ["No suba el tamaño máximo de archivos por encima de 4 MB en la demo de Vercel."],
+  },
+];
+
+/** Reglas que valen en todo el sistema (encabezan «Manual»). */
+export const REGLAS_GENERALES = [
+  "Cada usuario ve solo las empresas donde tiene rol: Analista (ve y registra) o Consulta (solo ve).",
+  "Nada se borra: los registros se dan de baja, los pagos se anulan con motivo y las pólizas confirmadas se cambian por endoso.",
+  "Los importes siempre llevan su moneda y el sistema nunca suma ni convierte monedas distintas.",
+  "Las vigencias van desde el día de inicio hasta el día anterior a la fecha «hasta» que dice la póliza.",
+  "Lo marcado «Propuesta» es práctica de mercado pendiente de confirmar con cada contrato.",
+  "Todo cambio queda en la bitácora con su usuario y se ve en el «Historial» de cada ficha.",
+  "El botón «i» junto al título de cada pantalla muestra su guía; este manual las reúne todas.",
 ];
 
 export const GUIAS: Record<string, Guia> = Object.fromEntries(lista.map((g) => [g.id, g]));

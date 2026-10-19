@@ -16,3 +16,7 @@ test("cada guía tiene pasos y está completa", () => {
     assert.ok(g.pasos.length >= 2, `${g.id}: al menos dos pasos`);
   }
 });
+
+test("cada pantalla de Configuración tiene su guía en el manual", () => {
+  for (const id of ["usuarios", "empresas", "catalogos", "reglas", "flujos", "ajustes", "base-datos"]) assert.ok(GUIAS[id], id);
+});

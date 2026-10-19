@@ -5,15 +5,22 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { BotonVolver } from "./boton-volver";
 
-export type EnlaceNavegacion = { href: string; etiqueta: string };
+export type EnlaceNavegacion = {
+  href: string;
+  etiqueta: string;
+  /** Otras rutas en las que la pestaña se marca activa (las pantallas que agrupa). */
+  activoEn?: string[];
+};
+
+const dentro = (ruta: string, base: string) => ruta === base || ruta.startsWith(`${base}/`);
 
 export function Navegacion({ enlaces }: { enlaces: EnlaceNavegacion[] }) {
   const ruta = usePathname();
 
   return (
     <nav aria-label="Secciones del sistema" className="-mb-px flex gap-1 overflow-x-auto">
-      {enlaces.map(({ href, etiqueta }) => {
-        const activo = ruta === href || ruta.startsWith(`${href}/`);
+      {enlaces.map(({ href, etiqueta, activoEn }) => {
+        const activo = [href, ...(activoEn ?? [])].some((b) => dentro(ruta, b));
         return (
           <Link
             key={href}

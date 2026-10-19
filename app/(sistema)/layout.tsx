@@ -8,9 +8,9 @@ import { Navegacion, type EnlaceNavegacion } from "@/components/sistema/navegaci
 import { claseBoton } from "@/components/ui/boton";
 import { SelectorTema } from "@/components/ui/selector-tema";
 import { areasVisibles } from "@/lib/auth/areas-visibles";
-import { comoGestor, requerirSesion, tienePermiso } from "@/lib/auth/dal";
+import { requerirSesion, tienePermiso } from "@/lib/auth/dal";
+import { opcionesConfiguracion } from "@/lib/configuracion";
 import { empresasDe } from "@/lib/fichas/acceso";
-import { puedeGestionarUsuarios } from "@/lib/usuarios/alcance";
 import { COOKIE_TEMA, leerTema } from "@/lib/tema";
 import { cookies } from "next/headers";
 
@@ -18,21 +18,15 @@ export default async function LayoutSistema({ children }: LayoutProps<"/">) {
   const usuario = await requerirSesion();
   const tema = leerTema((await cookies()).get(COOKIE_TEMA)?.value);
 
+  // Menú corto: Inicio, una pestaña por área (hoy «Gestión de Pólizas»; luego «Presupuestos»),
+  // Configuración, Programador (solo administrador) y Manual.
+  const configuracion = opcionesConfiguracion(usuario);
   const enlaces: EnlaceNavegacion[] = [
     { href: "/inicio", etiqueta: "Inicio" },
-    // Una pestaña por área, solo las que el usuario tiene habilitadas.
-    ...areasVisibles(usuario).map((a) => ({ href: `/${a.id}`, etiqueta: a.pestana })),
-    ...(puedeGestionarUsuarios(comoGestor(usuario)) ? [{ href: "/admin/usuarios", etiqueta: "Usuarios" }] : []),
-    ...(tienePermiso(usuario, "admin.sistema")
-      ? [
-          { href: "/admin/empresas", etiqueta: "Empresas" },
-          { href: "/admin/catalogos", etiqueta: "Catálogos" },
-          { href: "/admin/reglas", etiqueta: "Reglas" },
-          { href: "/admin/flujos", etiqueta: "Flujos" },
-          { href: "/admin/base-datos", etiqueta: "Base de datos" },
-        ]
-      : []),
-    ...(tienePermiso(usuario, "admin.sistema") || tienePermiso(usuario, "sistema.desarrollador") ? [{ href: "/ajustes", etiqueta: "Ajustes" }] : []),
+    ...areasVisibles(usuario).map((a) => ({ href: `/${a.id}`, etiqueta: a.pestana, activoEn: a.prefijos })),
+    ...(configuracion.length > 0 ? [{ href: "/configuracion", etiqueta: "Configuración", activoEn: ["/configuracion", ...configuracion.map((o) => o.ruta)] }] : []),
+    ...(tienePermiso(usuario, "admin.sistema") ? [{ href: "/admin/base-datos", etiqueta: "Programador" }] : []),
+    { href: "/manual", etiqueta: "Manual" },
   ];
 
   return (

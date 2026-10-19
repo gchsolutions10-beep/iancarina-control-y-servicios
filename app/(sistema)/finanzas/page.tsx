@@ -1,5 +1,6 @@
-import { PaginaArea } from "@/components/sistema/pagina-area";
+import { redirect } from "next/navigation";
 
-export default function AreaFinanzas() {
-  return <PaginaArea id="finanzas" />;
+/** Las antiguas pestañas por área ahora están dentro de «Gestión de Pólizas». */
+export default function Pestana() {
+  redirect("/gestion-polizas");
 }

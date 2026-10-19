@@ -62,6 +62,9 @@ del sistema (login, usuarios, ajustes, componentes) se copió de ahí y ya no se
   propuesta base de mercado (`docs/REGLAS-Y-PENDIENTES.md` §2, autorizada por GCH), cargada como reglas
   configurables marcadas «Propuesta». Si falta un parámetro, el cálculo queda como simulación y la
   confirmación financiera se bloquea con un mensaje que dice qué falta.
+- Menú corto: Inicio · una pestaña por área (`lib/modulos.ts`: hoy «Gestión de Pólizas»; luego
+  «Presupuestos» con su propio permiso) · Configuración (`lib/configuracion.ts`) · Programador (base de
+  datos, solo administrador) · Manual (`/manual`, guías de `lib/ayuda/guias.ts` filtradas por permisos).
 - Toda escritura: sesión → permiso **en la empresa** del registro → Zod → transacción con bitácora
   (`registrarGestion(..., { empresa, entidad, idRegistro, operacion })` alimenta el «Historial» de cada ficha).
 - Formularios: `components/formularios/formulario-accion.tsx` (errores por campo, no reinicia lo escrito).
@@ -90,7 +93,9 @@ del sistema (login, usuarios, ajustes, componentes) se copió de ahí y ya no se
 - [x] Etapa 5: tablero gerencial por moneda, reportes con filtros en la URL, Excel y PDF (pólizas,
       asegurados, detalle por CECO, saldos con antigüedad, siniestros) y campana de avisos
       (`docs/modulos/reportes.md`)
-- [ ] Etapa 6: despliegue dual e instalación
+- [x] Etapa 6: despliegue dual: demo en Vercel + Neon (`docs/DESPLIEGUE.md`) y servidor de la empresa con
+      `.env.servidor.example`, `npm run instalar` / `npm run verificar`, PM2 y respaldos
+      (`docs/INSTALACION-SERVIDOR.md`)
 
 ## Flujo de publicación
 
