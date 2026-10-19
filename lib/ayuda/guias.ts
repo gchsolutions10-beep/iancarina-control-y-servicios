@@ -181,6 +181,65 @@ const lista: Guia[] = [
     ],
     evitar: ["No use la consola SQL para el trabajo diario: todo cambio debe hacerse desde su pantalla para que quede bien registrado."],
   },
+  {
+    id: "siniestros",
+    titulo: "Siniestros",
+    quien: "Analistas (registran) y usuarios de consulta (solo ven). Los de personas solo los ve quien tiene «Ver datos personales».",
+    para: "Llevar cada expediente de vehículos, personas y propiedades: afectados, póliza que responde, etapas, importes, reembolso por cobrar, actuaciones y documentos.",
+    pasos: [
+      "Pulse «Nuevo expediente», elija el tipo y complete fechas, afectado y qué ocurrió. El número SIN-AAAA-NNNN se asigna solo.",
+      "En el expediente, use «Vincular póliza» para indicar la póliza y cobertura que responde (solo aparecen las que lo cubrían ese día).",
+      "Registre los importes: presupuestado, autorizado y reconocido. Si cambian, registre el nuevo: el anterior queda en el historial.",
+      "Suba los documentos de cada etapa y pulse «Terminar etapa y pasar a la siguiente».",
+      "Con el reembolso reconocido, cree la cuenta por cobrar; los cobros se registran en Finanzas → Cuentas por cobrar.",
+      "Al terminar, cierre el expediente. Registre actuaciones (llamadas, visitas) para que no quede «sin movimiento».",
+    ],
+    tener: [
+      "Autorizado no es pagado y reconocido no es cobrado: lo cobrado sale solo de los cobros registrados.",
+      "Cerrar el expediente no cierra la cuenta por cobrar: aparece en «Cerrados por cobrar» hasta cobrarse.",
+      "Si la póliza tiene límites (riesgos diversos), el sistema avisa al acercarse y no deja pasar el 100 %, mostrando el cálculo del disponible.",
+      "Los expedientes de personas son confidenciales: se ocultan a quien no tiene el permiso y cada consulta queda en la bitácora.",
+    ],
+    evitar: ["No borre ni reemplace un importe: registre el nuevo con su motivo.", "No vincule una póliza que no cubría al afectado en la fecha del evento."],
+  },
+  {
+    id: "transporte",
+    titulo: "Transporte contratado",
+    quien: "Analistas de cada empresa.",
+    para: "Registrar las pérdidas de mercancía que viajaba con transportistas externos y seguir su reclamo.",
+    pasos: [
+      "Pulse «Nuevo expediente», elija el transportista (empresa con la función «Transportista»), la placa o el vehículo propio, la mercancía y la guía.",
+      "Registre la pérdida, los importes y las actuaciones como en cualquier siniestro.",
+      "Si corresponde, cree la cuenta por cobrar al transportista o a la aseguradora.",
+    ],
+    tener: ["La póliza de los vehículos propios no cubre al transportista externo salvo que se vincule de forma explícita."],
+    evitar: ["No registre la mercancía como un vehículo afectado."],
+  },
+  {
+    id: "flujos",
+    titulo: "Flujos de siniestros",
+    quien: "Solo el administrador.",
+    para: "Definir las etapas que recorre cada tipo de siniestro y los documentos que se esperan en cada una.",
+    pasos: [
+      "Abra una etapa para cambiar su nombre, orden o documentos requeridos; desactívela si ya no se usa.",
+      "Use «Agregar etapa» o «Nuevo flujo» si hace falta otro recorrido.",
+      "En «Tipos de siniestro», elija qué flujo sigue cada tipo o agregue uno nuevo.",
+    ],
+    tener: [
+      "El flujo «General (provisional)» se cargó para personas, propiedades y transporte mientras el cliente define los suyos.",
+      "Un expediente conserva el flujo con que se abrió; los cambios de etapas valen para lo que le falta recorrer.",
+    ],
+    evitar: ["No reutilice una etapa para otra cosa: cree una nueva y desactive la anterior."],
+  },
+  {
+    id: "cuentas-por-cobrar",
+    titulo: "Cuentas por cobrar",
+    quien: "Analistas (registran cobros) y usuarios de consulta.",
+    para: "Seguir los reembolsos de siniestros reconocidos y las devoluciones de prima por bajas hasta cobrarlos.",
+    pasos: ["Use las tarjetas para ver lo vencido o por vencer.", "Abra una cuenta y registre cada cobro (puede ser parcial)."],
+    tener: ["El saldo baja solo con cobros registrados; las monedas no se mezclan.", "Un cobro mal registrado se anula con motivo (permiso «Anular y ajustar»)."],
+    evitar: ["No cierre el siniestro pensando que eso cobra el reembolso: el saldo sigue aquí."],
+  },
 ];
 
 export const GUIAS: Record<string, Guia> = Object.fromEntries(lista.map((g) => [g.id, g]));

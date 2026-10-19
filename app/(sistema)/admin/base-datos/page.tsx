@@ -21,7 +21,7 @@ export default async function BaseDatos() {
   const porEmpresa = await Promise.all(empresas.map(async (e) => ({ empresa: e, conteo: await conteos([e.codigo]) })));
   const opciones = empresas.map((e) => ({ valor: e.codigo, etiqueta: e.nombre }));
   // Se muestran las fichas principales de cada grupo y, debajo, todas las filas relacionadas.
-  const PRINCIPALES = { finanzas: ["obligaciones"], polizas: ["polizas"], activos: ["vehiculos", "propiedades"], personas: ["partes"] } as const;
+  const PRINCIPALES = { finanzas: ["obligaciones"], siniestros: ["siniestros"], polizas: ["polizas"], activos: ["vehiculos", "propiedades"], personas: ["partes"] } as const;
   type Conteo = Awaited<ReturnType<typeof conteos>>;
   const principal = (c: Conteo, g: (typeof ORDEN)[number]) => c[g].filter((x) => (PRINCIPALES[g] as readonly string[]).includes(x.tabla)).reduce((s, x) => s + x.filas, 0);
   const total = (c: Conteo, g: (typeof ORDEN)[number]) => c[g].reduce((s, x) => s + x.filas, 0);
@@ -33,7 +33,7 @@ export default async function BaseDatos() {
       <div className="flex flex-col gap-6">
         <Seccion titulo="Registros por empresa" descripcion="Lo que hay hoy en cada grupo, y debajo todas las filas relacionadas (asegurados, cálculos, pagos, documentos…).">
           <Tabla
-            columnas={["Empresa", "Obligaciones", "Pólizas", "Vehículos y propiedades", "Personas y organizaciones"]}
+            columnas={["Empresa", "Obligaciones", "Siniestros", "Pólizas", "Vehículos y propiedades", "Personas y organizaciones"]}
             vacio="No hay empresas."
             filas={porEmpresa.map(({ empresa, conteo }) => [empresa.nombre, ...ORDEN.map((g) => (
               <span key={g} className="tabular-nums">
@@ -44,7 +44,7 @@ export default async function BaseDatos() {
           />
         </Seccion>
 
-        <Seccion titulo="Datos de ejemplo" descripcion="Para presentar el sistema: 30 personas, 7 organizaciones (aseguradoras, corredor, taller, transportista), 32 vehículos y 6 propiedades con fotos, 5 pólizas con vigencias, renovación, endosos de alta y baja, pagos parciales y documentos.">
+        <Seccion titulo="Datos de ejemplo" descripcion="Para presentar el sistema: 30 personas, 7 organizaciones (aseguradoras, corredor, taller, transportista), 32 vehículos y 6 propiedades con fotos, 5 pólizas con vigencias, renovación, endosos de alta y baja, pagos parciales y documentos, y 8 siniestros (vehículos, persona, propiedad y transporte) con límites y cuentas por cobrar.">
           {permitidos ? (
             <>
               <AvisoBloqueo>

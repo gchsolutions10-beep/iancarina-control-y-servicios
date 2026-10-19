@@ -19,6 +19,9 @@ import {
   FormularioTarifa,
 } from "@/components/polizas/formularios-periodo";
 import { GraficaComparacion } from "@/components/polizas/grafica-comparacion";
+import { FormularioLimite } from "@/components/siniestros/formularios";
+import { quitarLimite } from "@/actions/siniestros";
+import { limitesConConsumo } from "@/lib/siniestros/datos";
 import { Indicador, MarcaPropuesta } from "@/components/polizas/piezas";
 import { MensajeEstado } from "@/components/ui/campo";
 import { requerirSesion, tienePermiso } from "@/lib/auth/dal";
@@ -59,7 +62,7 @@ export default async function PeriodoPoliza({ params, searchParams }: PageProps<
   const editable = registrar && (borrador || confirmado);
   const hoy = hoyPlanta();
 
-  const [partes, tarifas, asegurados, endosos, obligaciones, resumen, historial, opcPartes, sujetos, clases, comparacion, excluidos] = await Promise.all([
+  const [partes, tarifas, asegurados, endosos, obligaciones, resumen, historial, opcPartes, sujetos, clases, comparacion, excluidos, limites] = await Promise.all([
     partesPeriodo(id),
     tarifasPeriodo(id),
     aseguradosPeriodo(id),
@@ -72,6 +75,7 @@ export default async function PeriodoPoliza({ params, searchParams }: PageProps<
     valoresCatalogo("tipo_vehiculo"),
     p.anterior ? compararPeriodos(id, p.anterior.id) : Promise.resolve(null),
     p.anterior ? excluidosRenovacion(id, p.anterior.id) : Promise.resolve([]),
+    limitesConConsumo(BigInt(id)),
   ]);
   const coberturas = p.coberturas.filter((c) => c.activo).map((c) => ({ valor: String(c.id), etiqueta: c.nombre }));
   const tasa = tasaPromedio(resumen.primaTotal, resumen.sumaAsegurada);
@@ -179,6 +183,39 @@ export default async function PeriodoPoliza({ params, searchParams }: PageProps<
               <summary className="cursor-pointer text-sm font-medium text-tinta">Agregar o reemplazar tarifa</summary>
               <div className="mt-4">
                 <FormularioTarifa idPeriodo={id} coberturas={coberturas} clases={clases} moneda={m} />
+              </div>
+            </details>
+          )}
+        </Seccion>
+
+        <Seccion titulo="Límites (riesgos diversos)" descripcion="Límites del contrato que consumen los siniestros vinculados a este período: aviso al acercarse y bloqueo al superarlos.">
+          <Tabla
+            columnas={["Límite", "Monto", "Consumido", "Disponible", "Uso", ""]}
+            vacio="Sin límites configurados."
+            filas={limites.map((l) => [
+              <span key="l">
+                {l.descripcion ?? (l.tipo === "agregado_anual" ? "Agregado anual" : "Por bien")}
+                <span className="block text-xs text-tinta-tenue">
+                  {l.tipo === "agregado_anual" ? "Agregado anual" : "Por bien (se muestra el más usado)"} · consume {l.consume}
+                  {l.cobertura ? ` · ${l.cobertura}` : ""}
+                </span>
+              </span>,
+              <span key="m" className="tabular-nums">{formatearImporte(l.monto, l.moneda)}</span>,
+              <span key="c" className="tabular-nums">{formatearImporte(l.consumido)} ({formatearTasa(l.porcentaje)} %)</span>,
+              <span key="d" className="tabular-nums">{formatearImporte(l.disponible)}</span>,
+              <Insignia key="e" estado={`lim_${l.estado}`} />,
+              registrar && p.estado !== "anulado" ? (
+                <BotonAccion key="q" accion={quitarLimite} ocultos={{ id: String(l.id) }} variante="fantasma" confirmar="¿Desactivar este límite?">
+                  Quitar
+                </BotonAccion>
+              ) : null,
+            ])}
+          />
+          {registrar && p.estado !== "anulado" && (
+            <details className="mt-4 rounded-lg border border-borde p-4">
+              <summary className="cursor-pointer text-sm font-medium text-tinta">Agregar límite</summary>
+              <div className="mt-4">
+                <FormularioLimite idPeriodo={id} coberturas={coberturas} moneda={m} />
               </div>
             </details>
           )}

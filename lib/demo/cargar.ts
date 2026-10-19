@@ -8,6 +8,8 @@ import type { Prisma } from "@/lib/generated/prisma/client";
 import { recalcularPeriodo } from "@/lib/polizas/calcular";
 import { sujetoValido } from "@/lib/polizas/edicion";
 import { altaTx, bajaTx, confirmarPeriodoTx, INCLUIR_BAJA } from "@/lib/polizas/operaciones";
+import type { TipoImporte } from "@/lib/dominio/siniestros";
+import { avanzarEtapaTx, crearSiniestroTx, generarCobroTx, registrarImporteTx, type NuevoSiniestro } from "@/lib/siniestros/operaciones";
 import { hoyPlanta } from "@/lib/tiempo";
 import { IMAGENES_EJEMPLO, type ImagenEjemplo } from "./imagenes";
 
@@ -81,14 +83,14 @@ function pdfEjemplo(lineas: string[]) {
   return Buffer.from(pdf, "latin1");
 }
 
-export type ResumenCarga = { personas: number; organizaciones: number; vehiculos: number; propiedades: number; polizas: number; periodos: number; asegurados: number; endosos: number; pagos: number; archivos: number };
+export type ResumenCarga = { personas: number; organizaciones: number; vehiculos: number; propiedades: number; polizas: number; periodos: number; asegurados: number; endosos: number; pagos: number; archivos: number; siniestros: number };
 
 export async function cargarEjemplos(empresa: string, usuario: number): Promise<ResumenCarga> {
   if (!ejemplosPermitidos()) throw new Error("Los datos de ejemplo solo se cargan en la demo.");
   const existe = await db.partes.findFirst({ where: { empresa, identificacion_normalizada: `V${IDENT_CONTROL}` } });
   if (existe) throw new Error("Esta empresa ya tiene los datos de ejemplo. Límpialos primero si quieres volver a cargarlos.");
   const hoy = hoyPlanta();
-  const r: ResumenCarga = { personas: 0, organizaciones: 0, vehiculos: 0, propiedades: 0, polizas: 0, periodos: 0, asegurados: 0, endosos: 0, pagos: 0, archivos: 0 };
+  const r: ResumenCarga = { personas: 0, organizaciones: 0, vehiculos: 0, propiedades: 0, polizas: 0, periodos: 0, asegurados: 0, endosos: 0, pagos: 0, archivos: 0, siniestros: 0 };
 
   // ---------------------------------------------------------------- archivos (fuera de la transacción)
   const fotos = {} as Record<ImagenEjemplo, string>;
@@ -129,7 +131,7 @@ export async function cargarEjemplos(empresa: string, usuario: number): Promise<
       ];
       const corredor = await juridica(5, "CORRETAJE ANDINO, C.A. (DEMO)", ["Corredor"]);
       await juridica(6, "TALLER AUTOMOTRIZ CENTRAL (DEMO)", ["Taller"]);
-      await juridica(7, "TRANSPORTE RÁPIDO DEL SUR (DEMO)", ["Transportista"]);
+      const transportista = await juridica(7, "TRANSPORTE RÁPIDO DEL SUR (DEMO)", ["Transportista"]);
       r.organizaciones = 7;
 
       const personas = [];
@@ -174,7 +176,7 @@ export async function cargarEjemplos(empresa: string, usuario: number): Promise<
       }
       r.propiedades = propiedades.length;
       await registrarGestion(usuario, "DATOS DE EJEMPLO", `Cargados: ${r.personas} personas, ${r.organizaciones} organizaciones, ${r.vehiculos} vehículos, ${r.propiedades} propiedades`, tx, { empresa, operacion: "EJEMPLOS" });
-      return { tomador, aseguradoras, corredor, personas, vehiculos, propiedades };
+      return { tomador, aseguradoras, corredor, transportista, personas, vehiculos, propiedades };
     },
     { timeout: 120_000 },
   );
@@ -353,6 +355,9 @@ export async function cargarEjemplos(empresa: string, usuario: number): Promise<
     { timeout: 120_000 },
   );
 
+  // ---------------------------------------------------------------- siniestros
+  await cargarSiniestros(empresa, usuario, hoy, d0, p1.nuevo.id, fichas, livianos, r);
+
   // Cuadro de póliza en PDF para las pólizas confirmadas.
   for (const [numero, aseguradora] of [["AUT-DEMO-0001", "SEGUROS ATLANTICO"], ["AUT-DEMO-0002", "MERIDIONAL SEGUROS"], ["AP-DEMO-0003", "PROTECCION TOTAL SEGUROS"], ["INC-DEMO-0004", "MERIDIONAL SEGUROS"]]) {
     const pol = await db.polizas.findFirstOrThrow({ where: { empresa, numero } });
@@ -362,4 +367,142 @@ export async function cargarEjemplos(empresa: string, usuario: number): Promise<
     r.archivos++;
   }
   return r;
+}
+
+type Fichas = { tomador: { id: bigint }; aseguradoras: { id: bigint }[]; transportista: { id: bigint }; personas: { id: bigint; nombres: string | null; apellidos: string | null }[]; propiedades: { id: bigint; nombre: string }[] };
+
+/**
+ * Ocho expedientes que muestran cada situación: cerrado y cobrado, en taller, robo sin movimiento,
+ * cerca del límite por vehículo, cerrado pendiente de cobro, persona (confidencial), propiedad y
+ * transporte contratado con la cuenta por cobrar vencida. Límites de riesgos diversos en la flota.
+ */
+async function cargarSiniestros(empresa: string, usuario: number, hoy: string, d0: string, idPeriodoFlota: bigint, fichas: Fichas, livianos: { id: bigint; placa: string }[], r: ResumenCarga) {
+  const tipos = await db.tipos_siniestro.findMany();
+  const tipo = (prefijo: string) => tipos.find((t) => t.nombre.startsWith(prefijo))!.id;
+  const periodoDe = async (numero: string) => (await db.poliza_periodos.findFirstOrThrow({ where: { empresa, estado: "confirmado", polizas: { numero } }, orderBy: { numero_periodo: "desc" } })).id;
+  const [pAp, pInc] = await Promise.all([periodoDe("AP-DEMO-0003"), periodoDe("INC-DEMO-0004")]);
+
+  /** Póliza y cobertura que responde (la inclusión del sujeto en ese período). */
+  const cobertura = async (tx: Tx, idPeriodo: bigint, columna: "id_vehiculo" | "id_persona" | "id_propiedad", id: bigint, prefijo: string) => {
+    const inc = await tx.inclusiones.findFirstOrThrow({ where: { id_periodo: idPeriodo, [columna]: id }, include: { inclusion_coberturas: { include: { coberturas: true } } } });
+    return { id_inclusion: inc.id, id_cobertura: inc.inclusion_coberturas.find((c) => c.coberturas.nombre.startsWith(prefijo))!.id_cobertura, id_periodo: idPeriodo };
+  };
+  type Paso = { etapas?: string[]; importes?: [TipoImporte, number, string][]; cobro?: { a: bigint; monto: number; vence: string; cobrado?: number }; cierre?: string; actuaciones?: [string, string][] };
+  const expediente = async (d: Omit<NuevoSiniestro, "empresa" | "moneda" | "lugar" | "numero_aseguradora" | "tipo_perdida"> & { lugar: string; numero_aseguradora?: string; tipo_perdida?: string }, p: Paso) =>
+    db.$transaction(
+      async (tx) => {
+        const s = await crearSiniestroTx(tx, usuario, { empresa, moneda: "USD", numero_aseguradora: d.numero_aseguradora ?? null, tipo_perdida: d.tipo_perdida ?? null, ...d });
+        // Para que «sin movimiento» refleje las fechas del ejemplo y no el día de la carga.
+        await tx.siniestros.update({ where: { id: s.id }, data: { creado_en: fecha(d.fecha_notificacion) } });
+        for (const f of p.etapas ?? []) await avanzarEtapaTx(tx, usuario, s.id, f, null);
+        for (const [t, monto, f] of p.importes ?? []) await registrarImporteTx(tx, usuario, s.id, { tipo: t, monto: monto.toFixed(2), fecha: f, referencia: null, motivo: null });
+        for (const [f, texto] of p.actuaciones ?? []) await tx.siniestro_actuaciones.create({ data: { empresa, id_siniestro: s.id, fecha: fecha(f), descripcion: texto, creado_por: usuario } });
+        if (p.cobro) {
+          const emision = p.importes?.at(-1)?.[2] ?? hoy;
+          const o = await generarCobroTx(tx, usuario, s.id, { id_contraparte: p.cobro.a, monto: p.cobro.monto.toFixed(2), fecha_emision: emision, fecha_vencimiento: p.cobro.vence, documento: "FIN-DEMO" });
+          if (p.cobro.cobrado) {
+            const monto = p.cobro.cobrado.toFixed(2);
+            const pago = await tx.pagos.create({ data: { empresa, sentido: "ingreso", fecha: fecha(p.cobro.vence), monto, moneda: "USD", referencia: "DEP-DEMO", id_contraparte: p.cobro.a, observaciones: NOTA, creado_por: usuario } });
+            await tx.imputaciones.create({ data: { empresa, id_pago: pago.id, id_obligacion: o.id, monto, fecha: fecha(p.cobro.vence), creado_por: usuario } });
+            r.pagos++;
+          }
+        }
+        if (p.cierre) {
+          await tx.siniestro_etapas.updateMany({ where: { id_siniestro: s.id, fecha_fin: null }, data: { fecha_fin: fecha(p.cierre) } });
+          await tx.siniestros.update({ where: { id: s.id }, data: { estado: "cerrado", cerrado_en: fecha(p.cierre), motivo_cierre: "Reparación entregada y reembolso reconocido (ejemplo)" } });
+        }
+        r.siniestros++;
+        return s;
+      },
+      { timeout: 60_000 },
+    );
+  const v = (i: number) => ({ columna: "id_vehiculo" as const, id: livianos[i].id, nombre: livianos[i].placa });
+  const aseguradora = fichas.aseguradoras[0].id;
+
+  // Límites de riesgos diversos de la flota (los del requerimiento, como ejemplo).
+  await db.limites.createMany({
+    data: [
+      { empresa, id_periodo: idPeriodoFlota, tipo: "agregado_anual", monto: "60000.00", consume: "reconocido", descripcion: "Riesgos diversos — límite anual (ejemplo)", creado_por: usuario },
+      { empresa, id_periodo: idPeriodoFlota, tipo: "por_bien", monto: "20000.00", consume: "reconocido", descripcion: "Riesgos diversos — por vehículo (ejemplo)", creado_por: usuario },
+    ],
+  });
+
+  // 1. Choque: flujo completo, reconocido, cobrado y cerrado.
+  const f1 = sumarDiasISO(d0, 150);
+  const c1 = await db.$transaction((tx) => cobertura(tx, idPeriodoFlota, "id_vehiculo", livianos[0].id, "Casco"));
+  await expediente(
+      { id_tipo: tipo("Choque"), fecha_evento: f1, fecha_notificacion: sumarDiasISO(f1, 1), lugar: "Autopista regional, km 12 (ejemplo)", numero_aseguradora: "SIN-ASEG-7781", tipo_perdida: "parcial", descripcion: "Colisión trasera en tráfico lento. Daños en parachoques y compuerta. (DEMO)", afectado: { ...v(0), danos: "Parachoques y compuerta trasera", cobertura: c1 } },
+      {
+        etapas: [sumarDiasISO(f1, 3), sumarDiasISO(f1, 6), sumarDiasISO(f1, 20), sumarDiasISO(f1, 35)],
+        importes: [["presupuestado", 4200, sumarDiasISO(f1, 3)], ["autorizado", 3900, sumarDiasISO(f1, 6)], ["reconocido", 3900, sumarDiasISO(f1, 35)]],
+        cobro: { a: aseguradora, monto: 3900, vence: sumarDiasISO(f1, 50), cobrado: 3900 },
+        cierre: sumarDiasISO(f1, 52),
+        actuaciones: [[sumarDiasISO(f1, 2), "Se envió el aviso a la aseguradora con fotos del daño."], [sumarDiasISO(f1, 21), "El taller confirma la llegada de repuestos."]],
+      },
+  );
+
+  // 2. Choque reciente: en «Entrada a taller», con presupuesto y autorización.
+  const f2 = sumarDiasISO(hoy, -12);
+  const c2 = await db.$transaction((tx) => cobertura(tx, idPeriodoFlota, "id_vehiculo", livianos[3].id, "Casco"));
+  await expediente(
+    { id_tipo: tipo("Choque"), fecha_evento: f2, fecha_notificacion: f2, lugar: "Estacionamiento de la sede (ejemplo)", tipo_perdida: "parcial", descripcion: "Golpe lateral al maniobrar. (DEMO)", afectado: { ...v(3), danos: "Puerta delantera izquierda", cobertura: c2 } },
+    { etapas: [sumarDiasISO(f2, 2), sumarDiasISO(f2, 5)], importes: [["presupuestado", 2500, sumarDiasISO(f2, 2)], ["autorizado", 2300, sumarDiasISO(f2, 5)]], actuaciones: [[sumarDiasISO(f2, 6), "Vehículo ingresó al taller."]] },
+  );
+
+  // 3. Robo sin movimiento desde hace más de un mes.
+  const f3 = sumarDiasISO(hoy, -45);
+  await expediente({ id_tipo: tipo("Robo"), fecha_evento: f3, fecha_notificacion: sumarDiasISO(f3, 1), lugar: "Zona centro (ejemplo)", tipo_perdida: "total", descripcion: "Hurto del vehículo estacionado. Denuncia en trámite. (DEMO)", afectado: { ...v(4), danos: "Pérdida total por hurto", cobertura: null } }, {});
+
+  // 4. Daño grande: reconocido cerca del límite por vehículo (aviso), cerrado y cobrado en parte.
+  const f4 = sumarDiasISO(d0, 210);
+  const c4 = await db.$transaction((tx) => cobertura(tx, idPeriodoFlota, "id_vehiculo", livianos[7].id, "Casco"));
+  await expediente(
+    { id_tipo: tipo("Choque"), fecha_evento: f4, fecha_notificacion: f4, lugar: "Carretera nacional (ejemplo)", tipo_perdida: "parcial", descripcion: "Volcamiento sin lesionados. (DEMO)", afectado: { ...v(7), danos: "Carrocería y tren delantero", cobertura: c4 } },
+    {
+      etapas: [sumarDiasISO(f4, 2), sumarDiasISO(f4, 4), sumarDiasISO(f4, 30), sumarDiasISO(f4, 45)],
+      importes: [["presupuestado", 19000, sumarDiasISO(f4, 2)], ["autorizado", 18000, sumarDiasISO(f4, 4)], ["reconocido", 18000, sumarDiasISO(f4, 45)]],
+      cobro: { a: aseguradora, monto: 18000, vence: sumarDiasISO(f4, 60), cobrado: 10000 },
+      cierre: sumarDiasISO(f4, 46),
+    },
+  );
+
+  // 5. En reembolso: reconocido y cuenta por cobrar sin cobrar todavía.
+  const f5 = sumarDiasISO(hoy, -70);
+  const c5 = await db.$transaction((tx) => cobertura(tx, idPeriodoFlota, "id_vehiculo", livianos[9].id, "Casco"));
+  await expediente(
+    { id_tipo: tipo("Choque"), fecha_evento: f5, fecha_notificacion: sumarDiasISO(f5, 1), lugar: "Avenida principal (ejemplo)", tipo_perdida: "parcial", descripcion: "Choque en intersección. (DEMO)", afectado: { ...v(9), danos: "Frente y radiador", cobertura: c5 } },
+    {
+      etapas: [sumarDiasISO(f5, 3), sumarDiasISO(f5, 6), sumarDiasISO(f5, 25), sumarDiasISO(f5, 40)],
+      importes: [["presupuestado", 6800, sumarDiasISO(f5, 3)], ["autorizado", 6500, sumarDiasISO(f5, 6)], ["reconocido", 6500, sumarDiasISO(f5, 40)]],
+      cobro: { a: aseguradora, monto: 6500, vence: sumarDiasISO(hoy, 10) },
+    },
+  );
+
+  // 6. Accidente de persona (confidencial) con la póliza de accidentes personales.
+  const f6 = sumarDiasISO(hoy, -10);
+  const persona = fichas.personas[2];
+  const c6 = await db.$transaction((tx) => cobertura(tx, pAp, "id_persona", persona.id, "Gastos"));
+  await expediente(
+    { id_tipo: tipo("Accidente"), fecha_evento: f6, fecha_notificacion: sumarDiasISO(f6, 2), lugar: "Planta (ejemplo)", descripcion: "Caída en el área de carga; atención médica ambulatoria. (DEMO)", afectado: { columna: "id_persona", id: persona.id, nombre: `${persona.nombres} ${persona.apellidos}`, danos: "Esguince de tobillo", cobertura: c6 } },
+    { etapas: [sumarDiasISO(f6, 4)], importes: [["presupuestado", 1800, sumarDiasISO(f6, 4)]] },
+  );
+
+  // 7. Daño a una propiedad con la póliza de incendio.
+  const f7 = sumarDiasISO(hoy, -14);
+  const galpon = fichas.propiedades[1];
+  const c7 = await db.$transaction((tx) => cobertura(tx, pInc, "id_propiedad", galpon.id, "Incendio"));
+  await expediente(
+    { id_tipo: tipo("Daño a la propiedad"), fecha_evento: f7, fecha_notificacion: sumarDiasISO(f7, 1), lugar: galpon.nombre, tipo_perdida: "parcial", descripcion: "Conato de incendio en el tablero eléctrico. (DEMO)", afectado: { columna: "id_propiedad", id: galpon.id, nombre: galpon.nombre, danos: "Tablero eléctrico y techo", cobertura: c7 } },
+    { etapas: [sumarDiasISO(f7, 3)], importes: [["presupuestado", 35000, sumarDiasISO(f7, 3)]], actuaciones: [[sumarDiasISO(f7, 10), "Visita del perito de la aseguradora."]] },
+  );
+
+  // 8. Transporte contratado: mercancía perdida, cuenta por cobrar al transportista vencida.
+  const f8 = sumarDiasISO(hoy, -60);
+  await expediente(
+    {
+      id_tipo: tipo("Pérdida de mercancía"), fecha_evento: f8, fecha_notificacion: sumarDiasISO(f8, 1), lugar: "Ruta oriente (ejemplo)", descripcion: "Pérdida parcial de la carga por lluvia; lona dañada. (DEMO)",
+      transporte: { id_transportista: fichas.transportista.id, id_vehiculo: null, placa_texto: "A45BC7D", mercancia: "120 bultos de harina (ejemplo)", guia: "GD-DEMO-4410", valor_mercancia: "15600.00", perdida: "7800.00" },
+    },
+    { etapas: [sumarDiasISO(f8, 5), sumarDiasISO(f8, 15)], importes: [["reconocido", 7800, sumarDiasISO(f8, 15)]], cobro: { a: fichas.transportista.id, monto: 7800, vence: sumarDiasISO(f8, 30) } },
+  );
 }

@@ -35,6 +35,12 @@ Esquema PostgreSQL: `cys` (nombre por confirmar). Tablas del sistema base con pr
 > período son `borrador`/`confirmado`/`anulado` y «vigente / por vencer / vencido» se calcula con la
 > fecha; `limites` queda para la Etapa 4 (riesgos diversos). Detalle en `docs/modulos/polizas.md`.
 
+> **Implementado en la Etapa 4 (migración 006):** flujos con etapas y documentos requeridos, tipos de
+> siniestro, expedientes, afectados, transporte contratado, etapas, actuaciones, importes con historial
+> (vista `vw_siniestro_importes`), límites por período y el reembolso por cobrar en `obligaciones`
+> (`id_siniestro`). El agrupador de eventos y el responsable visible quedan para cuando se pidan.
+> Detalle en `docs/modulos/siniestros.md`.
+
 ## 2. Diagrama general
 
 ```mermaid

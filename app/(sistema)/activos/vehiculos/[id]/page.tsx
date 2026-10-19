@@ -6,6 +6,8 @@ import { FormularioBaja, FormularioVehiculo } from "@/components/fichas/formular
 import { Historial } from "@/components/fichas/historial";
 import { SeccionPolizas } from "@/components/polizas/seccion-polizas";
 import { polizasDe } from "@/lib/polizas/datos";
+import { SeccionSiniestros } from "@/components/siniestros/seccion-siniestros";
+import { siniestrosDe } from "@/lib/siniestros/datos";
 import { hoyPlanta } from "@/lib/tiempo";
 import { Datos, Encabezado, Insignia } from "@/components/fichas/piezas";
 import { SeccionTitulares } from "@/components/fichas/titulares";
@@ -28,7 +30,7 @@ export default async function FichaVehiculo({ params, searchParams }: PageProps<
   const sensibles = tienePermiso(usuario, "personas.datos_sensibles", v.empresa);
   const activo = v.estado === "activo";
 
-  const [titulares, documentos, historial, partes, modelos, colores, tipos, chutos, tiposDoc, nombres, polizas] = await Promise.all([
+  const [titulares, documentos, historial, partes, modelos, colores, tipos, chutos, tiposDoc, nombres, polizas, siniestros] = await Promise.all([
     titularidades(v.empresa, { vehiculo: id }),
     documentosDe(v.empresa, { tipo: "vehiculo", id }, sensibles),
     historialDe(v.empresa, "vehiculos", id),
@@ -40,6 +42,7 @@ export default async function FichaVehiculo({ params, searchParams }: PageProps<
     valoresCatalogo("tipo_documento"),
     nombresEmpresas(),
     polizasDe(v.empresa, { vehiculo: id }),
+    siniestrosDe(v.empresa, { vehiculo: id }, sensibles),
   ]);
   const creado = typeof (await searchParams).creado === "string";
 
@@ -93,6 +96,7 @@ export default async function FichaVehiculo({ params, searchParams }: PageProps<
           </Seccion>
         )}
         <SeccionPolizas filas={polizas} hoy={hoyPlanta()} />
+        <SeccionSiniestros filas={siniestros} />
         <Historial eventos={historial} />
       </div>
     </main>

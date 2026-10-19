@@ -83,7 +83,10 @@ del sistema (login, usuarios, ajustes, componentes) se copió de ahí y ya no se
       (`docs/modulos/polizas.md`)
 - [x] Base de datos (Administración → Base de datos, solo administrador): datos de ejemplo para la demo,
       limpieza por grupos y empresa, tablas y consola SQL (`docs/modulos/base-datos.md`)
-- [ ] Etapa 4: siniestros
+- [x] Etapa 4: siniestros con flujos y etapas configurables, expedientes SIN-AAAA-NNNN con afectados,
+      póliza vinculada explícitamente, transporte contratado, importes con historial, límites de riesgos
+      diversos (aviso 80 %, bloqueo 100 %), reembolsos por cobrar y confidencialidad de personas
+      (`docs/modulos/siniestros.md`)
 - [ ] Etapa 5: finanzas completas, indicadores y reportes
 - [ ] Etapa 6: despliegue dual e instalación
 

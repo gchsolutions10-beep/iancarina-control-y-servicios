@@ -35,7 +35,7 @@ export default async function Obligacion({ params, searchParams }: PageProps<"/f
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
       <Encabezado
-        volver={{ href: cobro ? "/finanzas/primas?ver=devoluciones" : "/finanzas/primas", etiqueta: cobro ? "Devoluciones por cobrar" : "Primas por pagar" }}
+        volver={{ href: cobro ? "/finanzas/primas?ver=cobrar" : "/finanzas/primas", etiqueta: cobro ? "Cuentas por cobrar" : "Primas por pagar" }}
         titulo={o.descripcion}
         subtitulo={`${o.aseguradora} · ${cobro ? "por cobrar" : "por pagar"} · ${o.moneda}`}
         ayuda={<AyudaModulo guia={guia("primas-por-pagar")} />}
@@ -58,6 +58,7 @@ export default async function Obligacion({ params, searchParams }: PageProps<"/f
             filas={[
               ["Póliza", o.poliza ? <Link key="p" href={`/polizas/periodos/${o.poliza.id_periodo}`} className="text-marca-700 hover:underline dark:text-marca-400">{`${o.poliza.numero} · período ${o.poliza.periodo}`}</Link> : null],
               ["Endoso", o.endoso ? `N.º ${o.endoso}` : null],
+              ["Siniestro", o.siniestro ? <Link key="s" href={`/siniestros/${o.siniestro.id}`} className="text-marca-700 hover:underline dark:text-marca-400">{o.siniestro.numero}</Link> : null],
               ["Recibo o aviso", o.documento],
               ["Aseguradora", <Link key="a" href={`/personas/${o.id_aseguradora}`} className="text-marca-700 hover:underline dark:text-marca-400">{o.aseguradora}</Link>],
             ]}

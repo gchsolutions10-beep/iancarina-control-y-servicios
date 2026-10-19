@@ -11,20 +11,24 @@ import { ENTIDAD_FICHA, type Ficha } from "@/lib/fichas/datos";
 import { textoOpcional } from "@/lib/validations/comunes";
 
 const texto = (fd: FormData, campo: string) => String(fd.get(campo) ?? "");
-const RUTA: Record<Ficha["tipo"], string> = { parte: "/personas", vehiculo: "/activos/vehiculos", propiedad: "/activos/propiedades", poliza: "/polizas" };
-const COLUMNA = { parte: "id_parte", vehiculo: "id_vehiculo", propiedad: "id_propiedad", poliza: "id_poliza" } as const;
+const RUTA: Record<Ficha["tipo"], string> = { parte: "/personas", vehiculo: "/activos/vehiculos", propiedad: "/activos/propiedades", poliza: "/polizas", siniestro: "/siniestros" };
+const COLUMNA = { parte: "id_parte", vehiculo: "id_vehiculo", propiedad: "id_propiedad", poliza: "id_poliza", siniestro: "id_siniestro" } as const;
 
 async function empresaDeFicha(f: Ficha): Promise<string | null> {
   const where = { where: { id: BigInt(f.id) }, select: { empresa: true } };
   const fila =
-    f.tipo === "parte" ? await db.partes.findUnique(where) : f.tipo === "vehiculo" ? await db.vehiculos.findUnique(where) : f.tipo === "poliza" ? await db.polizas.findUnique(where) : await db.propiedades.findUnique(where);
+    f.tipo === "parte" ? await db.partes.findUnique(where) : f.tipo === "vehiculo" ? await db.vehiculos.findUnique(where) : f.tipo === "poliza"
+          ? await db.polizas.findUnique(where)
+          : f.tipo === "siniestro"
+            ? await db.siniestros.findUnique(where)
+            : await db.propiedades.findUnique(where);
   return fila?.empresa ?? null;
 }
 
 function leerFicha(fd: FormData): Ficha | null {
   const tipo = texto(fd, "ficha");
   const id = Number(texto(fd, "id_ficha"));
-  if ((tipo === "parte" || tipo === "vehiculo" || tipo === "propiedad" || tipo === "poliza") && Number.isInteger(id) && id > 0) return { tipo, id };
+  if ((tipo === "parte" || tipo === "vehiculo" || tipo === "propiedad" || tipo === "poliza" || tipo === "siniestro") && Number.isInteger(id) && id > 0) return { tipo, id };
   return null;
 }
 
@@ -40,13 +44,17 @@ export async function subirDocumento(_previo: EstadoAccion, fd: FormData): Promi
 
   const archivo = fd.get("archivo");
   if (!(archivo instanceof File) || archivo.size === 0) return { error: "Elige un archivo.", errores: { archivo: "Elige un archivo" } };
-  const esFoto = texto(fd, "foto") === "1" && ficha.tipo !== "poliza";
+  const esFoto = texto(fd, "foto") === "1" && ficha.tipo !== "poliza" && ficha.tipo !== "siniestro";
   const tipoDocumento = esFoto ? "Fotografía" : texto(fd, "tipo_documento").trim();
   if (!tipoDocumento) return { error: "Elige el tipo de documento.", errores: { tipo_documento: "Elige el tipo" } };
   const descripcion = textoOpcional(500).parse(texto(fd, "descripcion"));
   const fechaDoc = texto(fd, "fecha_documento");
   // Solo quien ve datos personales puede marcar o subir documentos confidenciales.
-  const confidencial = fd.get("confidencial") === "on" && tienePermiso(usuario, "personas.datos_sensibles", empresa);
+  const sensibles = tienePermiso(usuario, "personas.datos_sensibles", empresa);
+  // Los documentos de un siniestro confidencial (personas) son siempre confidenciales.
+  const siniestroConfidencial = ficha.tipo === "siniestro" && (await db.siniestros.findUnique({ where: { id: BigInt(ficha.id) }, select: { confidencial: true } }))?.confidencial === true;
+  if (siniestroConfidencial && !sensibles) return { error: "Expediente confidencial: hace falta el permiso «Ver datos personales»." };
+  const confidencial = siniestroConfidencial || (fd.get("confidencial") === "on" && sensibles);
 
   const guardado = await guardarArchivo(archivo, { empresa, usuario: usuario.id, soloImagen: esFoto });
   if (!guardado.ok) return { error: guardado.error, errores: { archivo: "Archivo no válido" } };
@@ -94,6 +102,8 @@ export async function retirarDocumento(_previo: EstadoAccion, fd: FormData): Pro
       ? { tipo: "vehiculo", id: Number(doc.id_vehiculo) }
       : doc.id_poliza
         ? { tipo: "poliza", id: Number(doc.id_poliza) }
+        : doc.id_siniestro
+          ? { tipo: "siniestro", id: Number(doc.id_siniestro) }
         : { tipo: "propiedad", id: Number(doc.id_propiedad) };
   const motivo = texto(fd, "motivo").trim();
   if (motivo.length < 3) return { error: "Indica el motivo para retirar el documento." };

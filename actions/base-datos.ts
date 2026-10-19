@@ -160,7 +160,7 @@ export async function cargarDatosEjemplo(_previo: EstadoAccion, fd: FormData): P
     revalidatePath("/", "layout");
     return {
       ok: true,
-      mensaje: `Cargados: ${r.personas} personas, ${r.organizaciones} organizaciones, ${r.vehiculos} vehículos, ${r.propiedades} propiedades, ${r.polizas} pólizas (${r.periodos} vigencias, ${r.asegurados} asegurados), ${r.endosos} endosos, ${r.pagos} pagos y ${r.archivos} archivos.`,
+      mensaje: `Cargados: ${r.personas} personas, ${r.organizaciones} organizaciones, ${r.vehiculos} vehículos, ${r.propiedades} propiedades, ${r.polizas} pólizas (${r.periodos} vigencias, ${r.asegurados} asegurados), ${r.endosos} endosos, ${r.siniestros} siniestros, ${r.pagos} pagos y cobros, y ${r.archivos} archivos.`,
     };
   } catch (error) {
     console.error("[cargarDatosEjemplo]", error);

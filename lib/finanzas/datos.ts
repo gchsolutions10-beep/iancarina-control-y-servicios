@@ -28,7 +28,7 @@ export const ESTADOS_PAGO: Record<EstadoPago, string> = { vencida: "Vencida", po
 
 export type FiltroObligaciones = { empresas: string[]; q: string; estado: string; naturaleza: "por_pagar" | "por_cobrar"; pagina: number };
 
-/** Obligaciones (primas por pagar o devoluciones por cobrar) con saldo, estado y conteos por estado y moneda. */
+/** Obligaciones (primas por pagar, o reembolsos y devoluciones por cobrar) con saldo, estado y conteos por estado y moneda. */
 export async function listarObligaciones(f: FiltroObligaciones) {
   const q = f.q.trim();
   const dias = await ajuste("primas.dias_por_vencer");
@@ -37,7 +37,7 @@ export async function listarObligaciones(f: FiltroObligaciones) {
     where: {
       empresa: { in: f.empresas },
       naturaleza: f.naturaleza,
-      concepto: { in: ["prima", "ajuste_prima", "devolucion_prima"] },
+      concepto: { in: ["prima", "ajuste_prima", "devolucion_prima", "reembolso_siniestro"] },
       ...(q
         ? { OR: [{ descripcion: { contains: q, mode: "insensitive" } }, { documento: { contains: q, mode: "insensitive" } }, { partes: { razon_social: { contains: q, mode: "insensitive" } } }] }
         : {}),
@@ -85,6 +85,7 @@ export async function obtenerObligacion(id: number) {
       partes: { select: { id: true, razon_social: true } },
       poliza_periodos: { select: { id: true, numero_periodo: true, polizas: { select: { id: true, numero: true } } } },
       endosos: { select: { numero: true } },
+      siniestros: { select: { id: true, numero_expediente: true } },
       obligacion_movimientos: { orderBy: { id: "asc" }, include: { app_usuarios: { select: { nombre_apellido: true } } } },
       imputaciones: {
         orderBy: { id: "asc" },
@@ -109,6 +110,7 @@ export async function obtenerObligacion(id: number) {
     id_aseguradora: Number(o.partes.id),
     poliza: o.poliza_periodos ? { id: Number(o.poliza_periodos.polizas.id), numero: o.poliza_periodos.polizas.numero, id_periodo: Number(o.poliza_periodos.id), periodo: o.poliza_periodos.numero_periodo } : null,
     endoso: o.endosos?.numero ?? null,
+    siniestro: o.siniestros ? { id: Number(o.siniestros.id), numero: o.siniestros.numero_expediente } : null,
     descripcion: o.descripcion,
     documento: o.documento,
     moneda: o.moneda,

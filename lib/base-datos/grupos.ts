@@ -27,11 +27,26 @@ export const GRUPOS = {
       { tabla: "obligaciones" },
     ],
   },
+  siniestros: {
+    titulo: "Siniestros",
+    detalle: "Expedientes con sus afectados, etapas, actuaciones, importes, transporte y documentos.",
+    // Al limpiar siniestros se limpian también los pagos y obligaciones (sus reembolsos por cobrar).
+    requiere: ["finanzas"],
+    pasos: [
+      { tabla: "siniestro_importes", protegida: true },
+      { tabla: "siniestro_actuaciones", protegida: true },
+      { tabla: "siniestro_etapas" },
+      { tabla: "siniestro_transporte" },
+      { tabla: "siniestro_afectados" },
+      { tabla: "documentos", donde: "id_siniestro IS NOT NULL" },
+      { tabla: "siniestros" },
+    ],
+  },
   polizas: {
     titulo: "Pólizas",
-    detalle: "Pólizas, vigencias, asegurados, coberturas, tarifas, endosos, cálculos, beneficiarios, documentos de pólizas y reglas de cálculo propias de la empresa.",
-    // Al limpiar pólizas se limpian también sus pagos y obligaciones (dependen de ellas).
-    requiere: ["finanzas"],
+    detalle: "Pólizas, vigencias, asegurados, coberturas, tarifas, límites, endosos, cálculos, beneficiarios, documentos de pólizas y reglas de cálculo propias de la empresa.",
+    // Al limpiar pólizas se limpian también sus pagos, obligaciones y siniestros (dependen de ellas).
+    requiere: ["finanzas", "siniestros"],
     pasos: [
       { tabla: "endoso_lineas", protegida: true },
       { tabla: "beneficiarios", protegida: true },
@@ -40,6 +55,7 @@ export const GRUPOS = {
       { tabla: "calculos" },
       { tabla: "periodo_tarifas", protegida: true },
       { tabla: "periodo_partes", protegida: true },
+      { tabla: "limites" },
       { tabla: "endosos" },
       { tabla: "poliza_periodos", protegida: true },
       { tabla: "documentos", donde: "id_poliza IS NOT NULL" },
@@ -70,7 +86,7 @@ export const GRUPOS = {
 } as const satisfies Record<string, { titulo: string; detalle: string; requiere: readonly string[]; pasos: readonly Paso[] }>;
 
 export type Grupo = keyof typeof GRUPOS;
-export const ORDEN: Grupo[] = ["finanzas", "polizas", "activos", "personas"];
+export const ORDEN: Grupo[] = ["finanzas", "siniestros", "polizas", "activos", "personas"];
 export const esGrupo = (v: string): v is Grupo => Object.hasOwn(GRUPOS, v);
 
 /** Grupos elegidos más los que dependen de ellos (limpiar personas obliga a limpiar sus pólizas…). */

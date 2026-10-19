@@ -92,8 +92,8 @@ export const AREAS: Area[] = [
       {
         nombre: "Expedientes",
         modulos: [
-          { id: "siniestros", nombre: "Siniestros", descripcion: "Expedientes de personas, vehículos y propiedades con sus etapas", icono: AlertTriangle, permiso: "seguros.ver", origen: "cys.siniestros" },
-          { id: "transporte", nombre: "Transporte contratado", descripcion: "Pérdidas de mercancía con transportistas externos", icono: Truck, permiso: "seguros.ver", origen: "cys.siniestro_transporte" },
+          { id: "siniestros", nombre: "Siniestros", descripcion: "Expedientes de personas, vehículos y propiedades con sus etapas", icono: AlertTriangle, permiso: "seguros.ver", origen: "cys.siniestros", ruta: "/siniestros/lista" },
+          { id: "transporte", nombre: "Transporte contratado", descripcion: "Pérdidas de mercancía con transportistas externos", icono: Truck, permiso: "seguros.ver", origen: "cys.siniestro_transporte", ruta: "/siniestros/lista?sujeto=transporte" },
         ],
       },
     ],
@@ -107,7 +107,7 @@ export const AREAS: Area[] = [
         nombre: "Pagos y cobros",
         modulos: [
           { id: "primas-por-pagar", nombre: "Primas por pagar", descripcion: "Obligaciones con las aseguradoras, pagos parciales y devoluciones por bajas", icono: Wallet, permiso: "seguros.ver", origen: "cys.vw_saldos_obligaciones", ruta: "/finanzas/primas" },
-          { id: "cuentas-por-cobrar", nombre: "Cuentas por cobrar", descripcion: "Reembolsos de siniestros reconocidos, pendientes y recibidos", icono: HandCoins, permiso: "seguros.ver", origen: "cys.obligaciones" },
+          { id: "cuentas-por-cobrar", nombre: "Cuentas por cobrar", descripcion: "Reembolsos de siniestros y devoluciones de prima: reconocidos, pendientes y cobrados", icono: HandCoins, permiso: "seguros.ver", origen: "cys.vw_saldos_obligaciones", ruta: "/finanzas/primas?ver=cobrar" },
         ],
       },
     ],

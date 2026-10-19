@@ -49,6 +49,16 @@ const ESTADOS: Record<string, { texto: string; tono: "ok" | "neutro" | "baja" | 
   pendiente: { texto: "Pendiente", tono: "neutro", icono: Clock },
   anulada: { texto: "Anulada", tono: "neutro", icono: CircleMinus },
   baja: { texto: "Dado de baja", tono: "baja", icono: CircleX },
+  // Siniestros (prefijo sin_ para no chocar con otros estados)
+  sin_sin_movimiento: { texto: "Sin movimiento", tono: "baja", icono: TriangleAlert },
+  sin_abierto: { texto: "Abierto", tono: "aviso", icono: Clock },
+  sin_por_cobrar: { texto: "Cerrado, por cobrar", tono: "aviso", icono: Clock },
+  sin_cerrado: { texto: "Cerrado", tono: "ok", icono: CircleCheck },
+  sin_anulado: { texto: "Anulado", tono: "neutro", icono: CircleMinus },
+  // Límites (riesgos diversos)
+  lim_ok: { texto: "Dentro del límite", tono: "ok", icono: CircleCheck },
+  lim_aviso: { texto: "Cerca del límite", tono: "aviso", icono: TriangleAlert },
+  lim_excedido: { texto: "Excedido", tono: "baja", icono: CircleX },
 };
 
 /** Estado con ícono y texto (nunca solo color). */
