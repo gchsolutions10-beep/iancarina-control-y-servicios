@@ -3,11 +3,13 @@ import { KeyRound, LogOut } from "lucide-react";
 import { cerrarSesion } from "@/actions/auth";
 import { CreditoGch } from "@/components/marca/credito-gch";
 import { Logo } from "@/components/marca/logo";
+import { Campana } from "@/components/sistema/campana";
 import { Navegacion, type EnlaceNavegacion } from "@/components/sistema/navegacion";
 import { claseBoton } from "@/components/ui/boton";
 import { SelectorTema } from "@/components/ui/selector-tema";
 import { areasVisibles } from "@/lib/auth/areas-visibles";
 import { comoGestor, requerirSesion, tienePermiso } from "@/lib/auth/dal";
+import { empresasDe } from "@/lib/fichas/acceso";
 import { puedeGestionarUsuarios } from "@/lib/usuarios/alcance";
 import { COOKIE_TEMA, leerTema } from "@/lib/tema";
 import { cookies } from "next/headers";
@@ -35,7 +37,7 @@ export default async function LayoutSistema({ children }: LayoutProps<"/">) {
 
   return (
     <>
-      <header className="sticky top-0 z-20 border-b border-borde bg-superficie/90 backdrop-blur-md">
+      <header className="sticky top-0 z-20 border-b border-borde bg-superficie/90 backdrop-blur-md print:hidden">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
           <Link href="/inicio" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca-600/40">
             <Logo />
@@ -52,6 +54,7 @@ export default async function LayoutSistema({ children }: LayoutProps<"/">) {
                 )}
               </p>
             </div>
+            {empresasDe(usuario, "seguros.ver").length > 0 && <Campana abrirSola={usuario.notificaciones.alertas} />}
             <SelectorTema inicial={tema} />
             <Link href="/cuenta/clave" className={claseBoton("fantasma", "md")} aria-label="Cambiar mi clave">
               <KeyRound className="size-4" aria-hidden />
@@ -72,7 +75,7 @@ export default async function LayoutSistema({ children }: LayoutProps<"/">) {
 
       <div className="flex flex-1 flex-col">{children}</div>
 
-      <footer className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
+      <footer className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 print:hidden">
         <CreditoGch />
       </footer>
     </>

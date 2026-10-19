@@ -240,6 +240,56 @@ const lista: Guia[] = [
     tener: ["El saldo baja solo con cobros registrados; las monedas no se mezclan.", "Un cobro mal registrado se anula con motivo (permiso «Anular y ajustar»)."],
     evitar: ["No cierre el siniestro pensando que eso cobra el reembolso: el saldo sigue aquí."],
   },
+  {
+    id: "tablero",
+    titulo: "Tablero gerencial",
+    quien: "Todos los usuarios, con los datos de sus empresas.",
+    para: "Ver de un vistazo las pólizas vigentes, primas, sumas aseguradas, saldos por pagar y por cobrar, siniestros y lo que vence pronto.",
+    pasos: [
+      "Elija la empresa (si ve varias) y la moneda de las gráficas.",
+      "Pulse una póliza o una prima de las tablas de abajo para ir a su ficha.",
+      "Para el detalle, vaya a Reportes: cada indicador tiene su reporte con filtros y Excel.",
+    ],
+    tener: [
+      "Los importes se muestran por moneda: el sistema nunca suma ni convierte monedas.",
+      "Prima neta = prima inicial de la vigencia + endosos confirmados (altas suman, bajas restan).",
+      "Las cifras salen de los mismos datos de las pantallas: un pago o un endoso se refleja al instante.",
+    ],
+    evitar: ["No tome las primas «Propuesta» como definitivas: dependen de las reglas aún sin confirmar con cada contrato."],
+  },
+  {
+    id: "reportes",
+    titulo: "Reportes",
+    quien: "Todos los usuarios, con los datos de sus empresas.",
+    para: "Sacar listados de pólizas y vigencias, asegurados, primas por CECO, saldos por pagar y por cobrar con antigüedad, y siniestros.",
+    pasos: [
+      "Elija un reporte y combine los filtros: las listas y fechas se aplican solas; los textos con Enter.",
+      "Quite un filtro con la «x» de su etiqueta, o todos con «Limpiar filtros».",
+      "Pulse «Excel» para descargar todas las filas, o «Imprimir o PDF» y elija «Guardar como PDF».",
+      "Copie el enlace de la barra del navegador para compartir el reporte con los mismos filtros.",
+    ],
+    tener: [
+      "Los totales van por moneda al pie de la tabla.",
+      "Los siniestros confidenciales salen sin datos de la persona si su usuario no tiene «Ver datos personales».",
+      "En pantalla se muestran hasta 500 filas; Excel e impresión traen todas.",
+    ],
+    evitar: ["No edite el Excel para corregir datos: corrija en el sistema y vuelva a descargar."],
+  },
+  {
+    id: "detalle-ceco",
+    titulo: "Detalle por CECO",
+    quien: "Todos los usuarios, con los datos de sus empresas.",
+    para: "Repartir la prima de las vigencias confirmadas por centro de costo y cobertura, para cargarla a cada área.",
+    pasos: [
+      "Elija la fecha de corte («Vigencias al») y, si quiere, el ramo.",
+      "Descargue el Excel para el reparto contable.",
+    ],
+    tener: [
+      "Prima neta = prima de cada asegurado (inicial y altas por endoso) menos las devoluciones por bajas.",
+      "El CECO es el que se cargó en cada asegurado de la póliza; sin CECO sale «Sin CECO».",
+    ],
+    evitar: ["No cambie el CECO en el Excel: el reparto debe salir del sistema para que cuadre con las pólizas."],
+  },
 ];
 
 export const GUIAS: Record<string, Guia> = Object.fromEntries(lista.map((g) => [g.id, g]));

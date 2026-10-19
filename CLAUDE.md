@@ -87,7 +87,9 @@ del sistema (login, usuarios, ajustes, componentes) se copió de ahí y ya no se
       póliza vinculada explícitamente, transporte contratado, importes con historial, límites de riesgos
       diversos (aviso 80 %, bloqueo 100 %), reembolsos por cobrar y confidencialidad de personas
       (`docs/modulos/siniestros.md`)
-- [ ] Etapa 5: finanzas completas, indicadores y reportes
+- [x] Etapa 5: tablero gerencial por moneda, reportes con filtros en la URL, Excel y PDF (pólizas,
+      asegurados, detalle por CECO, saldos con antigüedad, siniestros) y campana de avisos
+      (`docs/modulos/reportes.md`)
 - [ ] Etapa 6: despliegue dual e instalación
 
 ## Flujo de publicación

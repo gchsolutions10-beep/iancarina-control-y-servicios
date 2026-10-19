@@ -120,9 +120,9 @@ export const AREAS: Area[] = [
       {
         nombre: "Indicadores y reportes",
         modulos: [
-          { id: "tablero", nombre: "Tablero gerencial", descripcion: "Primas, sumas aseguradas, vencimientos, siniestros y saldos", icono: LayoutDashboard, permiso: "seguros.ver", origen: "cys.vw_*" },
-          { id: "reportes", nombre: "Reportes", descripcion: "Filtros combinados, Excel y PDF", icono: FileSpreadsheet, permiso: "seguros.ver", origen: "cys.vw_*" },
-          { id: "detalle-ceco", nombre: "Detalle por CECO", descripcion: "Primas a pagar por organización y centro de costo", icono: BarChart3, permiso: "seguros.ver", origen: "cys.vw_*" },
+          { id: "tablero", nombre: "Tablero gerencial", descripcion: "Primas, sumas aseguradas, vencimientos, siniestros y saldos", icono: LayoutDashboard, permiso: "seguros.ver", origen: "cys.poliza_periodos, cys.vw_saldos_obligaciones, cys.siniestros", ruta: "/reportes/tablero" },
+          { id: "reportes", nombre: "Reportes", descripcion: "Filtros combinados, Excel y PDF", icono: FileSpreadsheet, permiso: "seguros.ver", origen: "cys.poliza_periodos, cys.inclusiones, cys.vw_saldos_obligaciones, cys.siniestros", ruta: "/reportes/lista" },
+          { id: "detalle-ceco", nombre: "Detalle por CECO", descripcion: "Primas a pagar por organización y centro de costo", icono: BarChart3, permiso: "seguros.ver", origen: "cys.inclusion_coberturas, cys.endoso_lineas", ruta: "/reportes/ceco" },
         ],
       },
     ],
