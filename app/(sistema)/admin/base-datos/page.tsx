@@ -12,8 +12,8 @@ import { listarEmpresas } from "@/lib/empresas";
 import { formatearEntero } from "@/lib/formato";
 
 export const metadata: Metadata = { title: "Base de datos" };
-// La carga de ejemplos sube fotos y calcula varias pólizas: puede tardar.
-export const maxDuration = 300;
+// La carga de ejemplos sube fotos y calcula varias pólizas (unos segundos); 60 s es el máximo del plan de Vercel.
+export const maxDuration = 60;
 
 export default async function BaseDatos() {
   await requerirPermiso("admin.sistema");
