@@ -20,7 +20,7 @@ export function FormularioVehiculo({ v, empresas, modelos, colores, tipos, chuto
         <Seleccion nombre="id_modelo" etiqueta="Marca y modelo" valor={v.id_modelo ? String(v.id_modelo) : ""} opciones={modelos} className="sm:col-span-2" ayuda={modelos.length === 0 ? "Carga marcas y modelos en Configuración." : undefined} />
         <Numero nombre="anio" etiqueta="Año" valor={v.anio} entero />
         <Seleccion nombre="color" etiqueta="Color" valor={v.color} opciones={colores} />
-        <Entrada nombre="tm" etiqueta="TM" valor={v.tm} ayuda="Significado por confirmar con el cliente." />
+        <Numero nombre="tm" etiqueta="TM (toneladas métricas)" valor={v.tm?.replace(".", ",")} ayuda="Capacidad de carga: 18, 30…" />
         <Seleccion nombre="clasificacion_chuto" etiqueta="Clasificación de chuto" valor={v.clasificacion_chuto} opciones={chutos} vacio="No aplica" />
         <Entrada nombre="fecha_adquisicion" etiqueta="Fecha de adquisición" tipo="date" valor={v.fecha_adquisicion} />
       </div>

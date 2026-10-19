@@ -164,6 +164,23 @@ const lista: Guia[] = [
     ],
     evitar: ["No apruebe una propuesta sin verificarla con un caso resuelto por la aseguradora."],
   },
+  {
+    id: "base-datos",
+    titulo: "Base de datos",
+    quien: "Solo el administrador.",
+    para: "Cargar datos de ejemplo para presentar el sistema, dejarlo en blanco cuando haga falta y revisar o corregir registros con cuidado.",
+    pasos: [
+      "«Datos de ejemplo»: elija la empresa de demostración y pulse «Cargar datos de ejemplo» (solo existe en la demo).",
+      "«Limpiar datos»: marque qué borrar (pagos, pólizas, vehículos y propiedades, personas), elija la empresa, escriba el motivo y LIMPIAR.",
+      "«Tablas y vistas»: abra una tabla, filtre y pulse una fila para corregirla. «Consola SQL»: consultas en solo lectura salvo que marque «Permitir cambios».",
+    ],
+    tener: [
+      "La limpieza es una sola operación: si algo falla no se borra nada. Arrastra lo que depende de lo elegido.",
+      "No se borran empresas, usuarios, ajustes, catálogos, reglas generales ni la bitácora: la limpieza queda registrada con su motivo.",
+      "Editar filas sigue respetando las reglas de la base: un período confirmado no se modifica desde aquí.",
+    ],
+    evitar: ["No use la consola SQL para el trabajo diario: todo cambio debe hacerse desde su pantalla para que quede bien registrado."],
+  },
 ];
 
 export const GUIAS: Record<string, Guia> = Object.fromEntries(lista.map((g) => [g.id, g]));

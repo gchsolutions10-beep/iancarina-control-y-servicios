@@ -3,7 +3,8 @@
 ## Reglas
 - Vehículos propios o de terceros. Placa única entre los vehículos **activos** de la empresa
   (normalizada). Marca y modelo, color, tipo y clasificación de chuto vienen de Configuración → Catálogos.
-- **TM** se guarda como texto libre hasta que el cliente confirme su significado.
+- **TM** = capacidad de carga en toneladas métricas (confirmado por el cliente: camiones de 18 t, 30 t…).
+  Número con 2 decimales (migración 005); se muestra en el listado y en la ficha.
 - Titulares con historial: propietario legal y responsable administrativo. Al registrar uno nuevo,
   el anterior termina el día previo; la base impide que se solapen.
 - **Venta, transferencia o retiro**: el activo no se borra. Queda con estado, fecha y motivo, sus

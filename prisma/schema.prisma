@@ -403,7 +403,7 @@ model vehiculos {
   placa_normalizada                                    String?         @default(dbgenerated("cys.normalizar_codigo((placa)::text)"))
   id_modelo                                            Int?
   anio                                                 Int?            @db.SmallInt
-  tm                                                   String?         @db.VarChar(40)
+  tm                                                   Decimal?        @db.Decimal(6, 2)
   color                                                String?         @db.VarChar(120)
   tipo_vehiculo                                        String?         @db.VarChar(120)
   clasificacion_chuto                                  String?         @db.VarChar(120)

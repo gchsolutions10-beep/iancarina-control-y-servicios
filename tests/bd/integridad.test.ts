@@ -83,3 +83,9 @@ test("la bitácora no se puede modificar ni borrar", { skip: omitir && "sin DATA
   await falla("UPDATE cys.app_bitacora SET descripcion = 'y'", "P0001");
   await falla("DELETE FROM cys.app_bitacora", "P0001");
 });
+
+test("TM es la capacidad en toneladas métricas: número entre 0 y 200", { skip: omitir && "sin DATABASE_URL_PRUEBAS" }, async () => {
+  await c.query("INSERT INTO cys.vehiculos (empresa, origen, placa, tm, creado_por) VALUES ('a', 'propio', 'TM18T01', 18, 900)");
+  await falla("INSERT INTO cys.vehiculos (empresa, origen, placa, tm, creado_por) VALUES ('a', 'propio', 'TM999', 500, 900)", "23514");
+  await falla("INSERT INTO cys.vehiculos (empresa, origen, placa, tm, creado_por) VALUES ('a', 'propio', 'TMXX', 'treinta', 900)", "22P02");
+});

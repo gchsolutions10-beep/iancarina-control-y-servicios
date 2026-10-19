@@ -82,7 +82,7 @@ Las respondidas están tachadas (ver §3). Las 3–8 tienen propuesta base (§2)
 el sistema deja la regla configurable y bloquea la confirmación que dependa de ella.
 
 **Vehículos y cálculos**
-1. ¿Qué significa **TM** en la ficha del vehículo? ¿Es texto, número o una lista?
+~~1. ¿Qué significa **TM** en la ficha del vehículo? ¿Es texto, número o una lista?~~ (respondida 2026-10-19: toneladas métricas, número)
 2. ¿Qué significa **APOV**? ¿Es una cobertura con prima propia o parte de otra?
 3. ¿Cómo se calcula la **suma asegurada** de un vehículo (valor + aditamentos/blindaje, otro criterio)?
 4. ¿En qué **base y unidad** están las tasas (% anual, por mil, por monto fijo)?

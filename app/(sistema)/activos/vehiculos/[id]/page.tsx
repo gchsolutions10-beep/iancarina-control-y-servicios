@@ -14,6 +14,7 @@ import { MensajeEstado } from "@/components/ui/campo";
 import { requerirSesion, tienePermiso } from "@/lib/auth/dal";
 import { guia } from "@/lib/ayuda/guias";
 import { nombresEmpresas } from "@/lib/empresas";
+import { formatearTasa } from "@/lib/formato";
 import { documentosDe, historialDe, modelosConMarca, obtenerVehiculo, opcionesPartes, titularidades, valoresCatalogo } from "@/lib/fichas/datos";
 
 export const metadata: Metadata = { title: "Vehículo" };
@@ -75,7 +76,7 @@ export default async function FichaVehiculo({ params, searchParams }: PageProps<
                 ["Año", v.anio],
                 ["Tipo", v.tipo_vehiculo],
                 ["Color", v.color],
-                ["TM", v.tm],
+                ["TM (toneladas métricas)", v.tm ? `${formatearTasa(v.tm)} t` : null],
                 ["Clasificación de chuto", v.clasificacion_chuto],
                 ["Batea", v.tiene_batea ? "Sí" : "No"],
                 ["Fecha de adquisición", v.fecha_adquisicion],

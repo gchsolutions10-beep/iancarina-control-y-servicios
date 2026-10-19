@@ -81,6 +81,8 @@ del sistema (login, usuarios, ajustes, componentes) se copió de ahí y ya no se
       con reglas versionadas (propuesta de mercado marcada «Propuesta»); endosos de alta, baja y cambios;
       renovación anual con elegibilidad y comparación; primas por pagar con pagos parciales y anulación
       (`docs/modulos/polizas.md`)
+- [x] Base de datos (Administración → Base de datos, solo administrador): datos de ejemplo para la demo,
+      limpieza por grupos y empresa, tablas y consola SQL (`docs/modulos/base-datos.md`)
 - [ ] Etapa 4: siniestros
 - [ ] Etapa 5: finanzas completas, indicadores y reportes
 - [ ] Etapa 6: despliegue dual e instalación

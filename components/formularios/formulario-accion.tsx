@@ -120,8 +120,8 @@ export function AreaTexto({ valor, ...p }: Base & { valor?: string | null }) {
 
 export function Casilla({ nombre, etiqueta, valor, valorCasilla = "on" }: { nombre: string; etiqueta: ReactNode; valor?: boolean; valorCasilla?: string }) {
   return (
-    <label className="flex items-center gap-2 text-sm text-tinta">
-      <input type="checkbox" name={nombre} value={valorCasilla} defaultChecked={valor} className="size-4 accent-marca-600" />
+    <label className="flex items-start gap-2 text-sm text-tinta">
+      <input type="checkbox" name={nombre} value={valorCasilla} defaultChecked={valor} className="mt-0.5 size-4 shrink-0 accent-marca-600" />
       {etiqueta}
     </label>
   );

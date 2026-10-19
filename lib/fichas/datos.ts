@@ -158,6 +158,7 @@ export async function listarVehiculos(f: FiltroActivos) {
       vehiculo: v.modelos ? `${v.modelos.marcas.nombre} ${v.modelos.nombre}` : "—",
       anio: v.anio,
       tipo: v.tipo_vehiculo,
+      tm: v.tm?.toString() ?? null,
       origen: v.origen,
       estado: v.estado,
     })),
@@ -171,6 +172,7 @@ export async function obtenerVehiculo(id: number) {
     ...v,
     id: n(v.id),
     marcaModelo: v.modelos ? `${v.modelos.marcas.nombre} ${v.modelos.nombre}` : null,
+    tm: v.tm?.toString() ?? null,
     fecha_adquisicion: aFecha(v.fecha_adquisicion),
     fecha_baja: aFecha(v.fecha_baja),
   };

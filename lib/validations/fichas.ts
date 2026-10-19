@@ -86,7 +86,8 @@ export const vehiculoSchema = z.object({
     .transform((v) => (v === "" ? null : Number(v)))
     .refine((v) => v === null || Number.isInteger(v), "Modelo no válido"),
   anio: numeroOpcional({ entero: true, min: 1950, max: anioActual + 1 }),
-  tm: textoOpcional(40),
+  /** Capacidad de carga en toneladas métricas (TM). */
+  tm: numeroOpcional({ min: 0.01, max: 200 }).transform((v) => (v === null ? null : v.toFixed(2))),
   color: textoOpcional(120),
   tipo_vehiculo: textoOpcional(120),
   clasificacion_chuto: textoOpcional(120),
