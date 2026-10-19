@@ -158,6 +158,7 @@ export async function listarVehiculos(f: FiltroActivos) {
       vehiculo: v.modelos ? `${v.modelos.marcas.nombre} ${v.modelos.nombre}` : "—",
       anio: v.anio,
       tipo: v.tipo_vehiculo,
+      tm: v.tm?.toString() ?? null,
       origen: v.origen,
       estado: v.estado,
     })),
@@ -171,6 +172,7 @@ export async function obtenerVehiculo(id: number) {
     ...v,
     id: n(v.id),
     marcaModelo: v.modelos ? `${v.modelos.marcas.nombre} ${v.modelos.nombre}` : null,
+    tm: v.tm?.toString() ?? null,
     fecha_adquisicion: aFecha(v.fecha_adquisicion),
     fecha_baja: aFecha(v.fecha_baja),
   };
@@ -207,10 +209,10 @@ export async function obtenerPropiedad(id: number) {
 }
 
 // ---------------------------------------------------------------- documentos e historial
-export type Ficha = { tipo: "parte" | "vehiculo" | "propiedad" | "poliza"; id: number };
+export type Ficha = { tipo: "parte" | "vehiculo" | "propiedad" | "poliza" | "siniestro"; id: number };
 
-const columnaFicha = { parte: "id_parte", vehiculo: "id_vehiculo", propiedad: "id_propiedad", poliza: "id_poliza" } as const;
-export const ENTIDAD_FICHA = { parte: "partes", vehiculo: "vehiculos", propiedad: "propiedades", poliza: "polizas" } as const;
+const columnaFicha = { parte: "id_parte", vehiculo: "id_vehiculo", propiedad: "id_propiedad", poliza: "id_poliza", siniestro: "id_siniestro" } as const;
+export const ENTIDAD_FICHA = { parte: "partes", vehiculo: "vehiculos", propiedad: "propiedades", poliza: "polizas", siniestro: "siniestros" } as const;
 
 export async function documentosDe(empresa: string, ficha: Ficha, verConfidenciales: boolean) {
   const filas = await db.documentos.findMany({

@@ -7,6 +7,8 @@ import { FormularioParte } from "@/components/fichas/formulario-parte";
 import { Historial } from "@/components/fichas/historial";
 import { SeccionPolizas } from "@/components/polizas/seccion-polizas";
 import { polizasDe } from "@/lib/polizas/datos";
+import { SeccionSiniestros } from "@/components/siniestros/seccion-siniestros";
+import { siniestrosDe } from "@/lib/siniestros/datos";
 import { hoyPlanta } from "@/lib/tiempo";
 import { Datos, Encabezado, Insignia, Tabla } from "@/components/fichas/piezas";
 import { Seccion } from "@/components/formularios/controles";
@@ -31,7 +33,7 @@ export default async function FichaParte({ params, searchParams }: PageProps<"/p
   const p = enmascarar(bruta, sensibles);
   const natural = p.tipo === "natural";
 
-  const [bienes, documentos, historial, tiposId, funciones, tiposDoc, nombres, polizas] = await Promise.all([
+  const [bienes, documentos, historial, tiposId, funciones, tiposDoc, nombres, polizas, siniestros] = await Promise.all([
     titularidades(empresa, { parte: id }),
     documentosDe(empresa, { tipo: "parte", id }, sensibles),
     historialDe(empresa, "partes", id),
@@ -40,6 +42,7 @@ export default async function FichaParte({ params, searchParams }: PageProps<"/p
     valoresCatalogo("tipo_documento"),
     nombresEmpresas(),
     polizasDe(empresa, { persona: id }),
+    siniestrosDe(empresa, { persona: id }, sensibles),
   ]);
   const creada = typeof (await searchParams).creada === "string";
 
@@ -98,6 +101,7 @@ export default async function FichaParte({ params, searchParams }: PageProps<"/p
 
         <SeccionDocumentos ficha={{ tipo: "parte", id }} documentos={documentos} puedeRegistrar={registrar} puedeConfidencial={sensibles} tipos={tiposDoc} />
         <SeccionPolizas filas={polizas} hoy={hoyPlanta()} />
+        <SeccionSiniestros filas={siniestros} />
         <Historial eventos={historial} />
       </div>
     </main>

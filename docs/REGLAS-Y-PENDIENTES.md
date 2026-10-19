@@ -82,7 +82,7 @@ Las respondidas están tachadas (ver §3). Las 3–8 tienen propuesta base (§2)
 el sistema deja la regla configurable y bloquea la confirmación que dependa de ella.
 
 **Vehículos y cálculos**
-1. ¿Qué significa **TM** en la ficha del vehículo? ¿Es texto, número o una lista?
+~~1. ¿Qué significa **TM** en la ficha del vehículo? ¿Es texto, número o una lista?~~ (respondida 2026-10-19: toneladas métricas, número)
 2. ¿Qué significa **APOV**? ¿Es una cobertura con prima propia o parte de otra?
 3. ¿Cómo se calcula la **suma asegurada** de un vehículo (valor + aditamentos/blindaje, otro criterio)?
 4. ¿En qué **base y unidad** están las tasas (% anual, por mil, por monto fijo)?
@@ -110,11 +110,11 @@ el sistema deja la regla configurable y bloquea la confirmación que dependa de 
 ~~20. **Empresas y filiales** iniciales. ¿Hay pólizas corporativas que cubren bienes o personas de **varias filiales** (una póliza, cargo por empresa/CECO)?~~ (respondida)
 ~~21. **Visibilidad de personas entre empresas**: un usuario de la filial A, ¿puede saber que una persona ya está registrada por la filial B? ¿Qué parte de su ficha puede ver?~~ (respondida)
 22. **Identificación de vehículos**: ¿la placa es única y estable, o hace falta serial de carrocería/motor? (no se agrega ningún campo sin confirmar)
-23. ¿El **número de póliza** es único por aseguradora? ¿Cómo se numeran los **expedientes** de siniestro (formato, por empresa, por año)?
+23. ¿El **número de póliza** es único por aseguradora? ~~¿Cómo se numeran los **expedientes** de siniestro?~~ (expedientes: SIN-AAAA-NNNN por empresa y año, GCH 2026-10-19)
 ~~24. **Usuario estándar**: ¿qué puede ver y hacer (registrar pólizas, pagos, siniestros)? ¿Quién ve datos personales y siniestros de personas?~~ (respondida)
 25. ¿Quién **autoriza** anulaciones, ajustes de cálculo y ventas retroactivas? ¿Hace falta doble aprobación?
 26. ¿Hay **corredor** en todas las pólizas? ¿Se registran comisiones? (no incluido hasta confirmar)
 ~~27. **Demo**: ¿qué almacenamiento en la nube se usa para documentos (Vercel Blob, Cloudflare R2, Amazon S3)? ¿Tamaño máximo por archivo?~~ (respondida)
 28. ¿Hace falta **aviso** de vencimientos (pólizas por vencer, expedientes sin movimiento, cuentas por cobrar vencidas)? ¿Con cuántos días?
 29. ¿Algún requisito legal de **protección de datos** o de conservación de documentos que debamos cumplir?
-30. Las etapas de siniestros de **personas y propiedades**: ¿usan el mismo flujo de vehículos o uno propio?
+30. Las etapas de siniestros de **personas y propiedades**: ¿usan el mismo flujo de vehículos o uno propio? (GCH 2026-10-19: flujo propio editable; se cargó «General (provisional)» hasta que el cliente lo defina)

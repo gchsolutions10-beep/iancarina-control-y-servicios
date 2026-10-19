@@ -92,8 +92,8 @@ export const AREAS: Area[] = [
       {
         nombre: "Expedientes",
         modulos: [
-          { id: "siniestros", nombre: "Siniestros", descripcion: "Expedientes de personas, vehículos y propiedades con sus etapas", icono: AlertTriangle, permiso: "seguros.ver", origen: "cys.siniestros" },
-          { id: "transporte", nombre: "Transporte contratado", descripcion: "Pérdidas de mercancía con transportistas externos", icono: Truck, permiso: "seguros.ver", origen: "cys.siniestro_transporte" },
+          { id: "siniestros", nombre: "Siniestros", descripcion: "Expedientes de personas, vehículos y propiedades con sus etapas", icono: AlertTriangle, permiso: "seguros.ver", origen: "cys.siniestros", ruta: "/siniestros/lista" },
+          { id: "transporte", nombre: "Transporte contratado", descripcion: "Pérdidas de mercancía con transportistas externos", icono: Truck, permiso: "seguros.ver", origen: "cys.siniestro_transporte", ruta: "/siniestros/lista?sujeto=transporte" },
         ],
       },
     ],
@@ -107,7 +107,7 @@ export const AREAS: Area[] = [
         nombre: "Pagos y cobros",
         modulos: [
           { id: "primas-por-pagar", nombre: "Primas por pagar", descripcion: "Obligaciones con las aseguradoras, pagos parciales y devoluciones por bajas", icono: Wallet, permiso: "seguros.ver", origen: "cys.vw_saldos_obligaciones", ruta: "/finanzas/primas" },
-          { id: "cuentas-por-cobrar", nombre: "Cuentas por cobrar", descripcion: "Reembolsos de siniestros reconocidos, pendientes y recibidos", icono: HandCoins, permiso: "seguros.ver", origen: "cys.obligaciones" },
+          { id: "cuentas-por-cobrar", nombre: "Cuentas por cobrar", descripcion: "Reembolsos de siniestros y devoluciones de prima: reconocidos, pendientes y cobrados", icono: HandCoins, permiso: "seguros.ver", origen: "cys.vw_saldos_obligaciones", ruta: "/finanzas/primas?ver=cobrar" },
         ],
       },
     ],
@@ -120,9 +120,9 @@ export const AREAS: Area[] = [
       {
         nombre: "Indicadores y reportes",
         modulos: [
-          { id: "tablero", nombre: "Tablero gerencial", descripcion: "Primas, sumas aseguradas, vencimientos, siniestros y saldos", icono: LayoutDashboard, permiso: "seguros.ver", origen: "cys.vw_*" },
-          { id: "reportes", nombre: "Reportes", descripcion: "Filtros combinados, Excel y PDF", icono: FileSpreadsheet, permiso: "seguros.ver", origen: "cys.vw_*" },
-          { id: "detalle-ceco", nombre: "Detalle por CECO", descripcion: "Primas a pagar por organización y centro de costo", icono: BarChart3, permiso: "seguros.ver", origen: "cys.vw_*" },
+          { id: "tablero", nombre: "Tablero gerencial", descripcion: "Primas, sumas aseguradas, vencimientos, siniestros y saldos", icono: LayoutDashboard, permiso: "seguros.ver", origen: "cys.poliza_periodos, cys.vw_saldos_obligaciones, cys.siniestros", ruta: "/reportes/tablero" },
+          { id: "reportes", nombre: "Reportes", descripcion: "Filtros combinados, Excel y PDF", icono: FileSpreadsheet, permiso: "seguros.ver", origen: "cys.poliza_periodos, cys.inclusiones, cys.vw_saldos_obligaciones, cys.siniestros", ruta: "/reportes/lista" },
+          { id: "detalle-ceco", nombre: "Detalle por CECO", descripcion: "Primas a pagar por organización y centro de costo", icono: BarChart3, permiso: "seguros.ver", origen: "cys.inclusion_coberturas, cys.endoso_lineas", ruta: "/reportes/ceco" },
         ],
       },
     ],

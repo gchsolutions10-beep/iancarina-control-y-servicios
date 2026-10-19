@@ -22,20 +22,20 @@ export default async function PrimasPorPagar({ searchParams }: PageProps<"/finan
   const params = await searchParams;
   const f = await leerFiltros(usuario, params);
   if (f.opcionesEmpresa.length === 0) redirect("/sin-acceso");
-  const naturaleza = params.ver === "devoluciones" ? "por_cobrar" : "por_pagar";
+  const naturaleza = params.ver === "cobrar" || params.ver === "cobrar" ? "por_cobrar" : "por_pagar";
   const { total, conteo, pendiente, filas } = await listarObligaciones({ ...f, naturaleza });
   const varias = f.opcionesEmpresa.length > 1;
-  const filtros = { q: f.q, empresa: f.empresa, estado: f.estado, ver: naturaleza === "por_cobrar" ? "devoluciones" : undefined };
+  const filtros = { q: f.q, empresa: f.empresa, estado: f.estado, ver: naturaleza === "por_cobrar" ? "cobrar" : undefined };
 
   return (
     <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">
       <Encabezado
-        titulo={naturaleza === "por_pagar" ? "Primas por pagar" : "Devoluciones de prima por cobrar"}
-        subtitulo={naturaleza === "por_pagar" ? "Obligaciones con las aseguradoras por períodos y endosos confirmados" : "Lo que las aseguradoras deben devolver por bajas"}
-        ayuda={<AyudaModulo guia={guia("primas-por-pagar")} />}
+        titulo={naturaleza === "por_pagar" ? "Primas por pagar" : "Cuentas por cobrar"}
+        subtitulo={naturaleza === "por_pagar" ? "Obligaciones con las aseguradoras por períodos y endosos confirmados" : "Reembolsos de siniestros reconocidos y devoluciones de prima por bajas"}
+        ayuda={<AyudaModulo guia={guia(naturaleza === "por_pagar" ? "primas-por-pagar" : "cuentas-por-cobrar")} />}
         acciones={
-          <Link href={enlace(BASE, { ver: naturaleza === "por_pagar" ? "devoluciones" : undefined })} className="text-sm text-marca-700 hover:underline dark:text-marca-400">
-            {naturaleza === "por_pagar" ? "Ver devoluciones por cobrar →" : "← Ver primas por pagar"}
+          <Link href={enlace(BASE, { ver: naturaleza === "por_pagar" ? "cobrar" : undefined })} className="text-sm text-marca-700 hover:underline dark:text-marca-400">
+            {naturaleza === "por_pagar" ? "Ver cuentas por cobrar →" : "← Ver primas por pagar"}
           </Link>
         }
       />
@@ -59,7 +59,7 @@ export default async function PrimasPorPagar({ searchParams }: PageProps<"/finan
       <FormularioFiltros accion={BASE} etiqueta="Filtrar obligaciones">
         <TextoFiltro nombre="q" etiqueta="Buscar" valor={f.q} placeholder="Aseguradora, póliza o recibo" />
         {f.estado && <input type="hidden" name="estado" value={f.estado} />}
-        {naturaleza === "por_cobrar" && <input type="hidden" name="ver" value="devoluciones" />}
+        {naturaleza === "por_cobrar" && <input type="hidden" name="ver" value="cobrar" />}
         {varias && <SelectFiltro nombre="empresa" etiqueta="Empresa" valor={f.empresa} opciones={f.opcionesEmpresa} todos="Todas" />}
       </FormularioFiltros>
       <div className="mt-5">

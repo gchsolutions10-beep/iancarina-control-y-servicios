@@ -11,7 +11,7 @@
     "typecheck": "prisma validate && next typegen && tsc --noEmit",
     "db:migrar": "tsx scripts/migrar.ts",
     "db:generar": "prisma generate",
-    "db:introspeccion": "prisma db pull",
+    "db:introspeccion": "prisma db pull && tsx scripts/ajustar-prisma.ts",
     "usuario:soporte": "tsx scripts/usuario-soporte.ts",
     "postinstall": "prisma generate",
     "test": "node --import tsx --test tests/*.test.ts",

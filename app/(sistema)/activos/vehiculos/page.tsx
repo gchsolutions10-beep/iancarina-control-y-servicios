@@ -8,6 +8,7 @@ import { requerirSesion } from "@/lib/auth/dal";
 import { guia } from "@/lib/ayuda/guias";
 import { listarVehiculos } from "@/lib/fichas/datos";
 import { leerFiltros } from "@/lib/fichas/filtros";
+import { formatearTasa } from "@/lib/formato";
 
 export const metadata: Metadata = { title: "Vehículos" };
 
@@ -27,7 +28,7 @@ export default async function Vehiculos({ searchParams }: PageProps<"/activos/ve
       f={f}
       estados={[{ valor: "activo", etiqueta: "Activos" }, { valor: "vendido", etiqueta: "Vendidos" }, { valor: "retirado", etiqueta: "Retirados" }]}
       buscar="Placa, marca o modelo"
-      columnas={["Placa", "Vehículo", "Año", "Tipo", "Origen", ...(varias ? ["Empresa"] : []), "Estado"]}
+      columnas={["Placa", "Vehículo", "Año", "Tipo", "TM", "Origen", ...(varias ? ["Empresa"] : []), "Estado"]}
       filas={filas.map((v) => [
         <Link key="p" href={`/activos/vehiculos/${v.id}`} className="font-medium text-marca-700 hover:underline dark:text-marca-400">
           {v.placa}
@@ -35,6 +36,7 @@ export default async function Vehiculos({ searchParams }: PageProps<"/activos/ve
         v.vehiculo,
         v.anio ?? "—",
         v.tipo ?? "—",
+        v.tm ? `${formatearTasa(v.tm)} t` : "—",
         v.origen === "propio" ? "Propio" : "Terceros",
         ...(varias ? [f.nombreEmpresa(v.empresa)] : []),
         <Insignia key="e" estado={v.estado} />,

@@ -6,6 +6,8 @@ import { FormularioBaja, FormularioPropiedad } from "@/components/fichas/formula
 import { Historial } from "@/components/fichas/historial";
 import { SeccionPolizas } from "@/components/polizas/seccion-polizas";
 import { polizasDe } from "@/lib/polizas/datos";
+import { SeccionSiniestros } from "@/components/siniestros/seccion-siniestros";
+import { siniestrosDe } from "@/lib/siniestros/datos";
 import { hoyPlanta } from "@/lib/tiempo";
 import { Datos, Encabezado, Insignia } from "@/components/fichas/piezas";
 import { SeccionTitulares } from "@/components/fichas/titulares";
@@ -27,7 +29,7 @@ export default async function FichaPropiedad({ params, searchParams }: PageProps
   const sensibles = tienePermiso(usuario, "personas.datos_sensibles", p.empresa);
   const activa = p.estado === "activa";
 
-  const [titulares, documentos, historial, partes, tipos, tiposDoc, nombres, polizas] = await Promise.all([
+  const [titulares, documentos, historial, partes, tipos, tiposDoc, nombres, polizas, siniestros] = await Promise.all([
     titularidades(p.empresa, { propiedad: id }),
     documentosDe(p.empresa, { tipo: "propiedad", id }, sensibles),
     historialDe(p.empresa, "propiedades", id),
@@ -36,6 +38,7 @@ export default async function FichaPropiedad({ params, searchParams }: PageProps
     valoresCatalogo("tipo_documento"),
     nombresEmpresas(),
     polizasDe(p.empresa, { propiedad: id }),
+    siniestrosDe(p.empresa, { propiedad: id }, sensibles),
   ]);
   const creada = typeof (await searchParams).creada === "string";
 
@@ -81,6 +84,7 @@ export default async function FichaPropiedad({ params, searchParams }: PageProps
           </Seccion>
         )}
         <SeccionPolizas filas={polizas} hoy={hoyPlanta()} />
+        <SeccionSiniestros filas={siniestros} />
         <Historial eventos={historial} />
       </div>
     </main>

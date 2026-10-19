@@ -1,8 +1,8 @@
 import "server-only";
 import { createHash, randomUUID } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { get, put } from "@vercel/blob";
+import { del, get, put } from "@vercel/blob";
 import { ajuste } from "@/lib/ajustes";
 import { db } from "@/lib/db";
 import { variable } from "@/lib/entorno";
@@ -18,6 +18,8 @@ type Almacen = {
   nombre: "nube" | "carpeta";
   guardar(clave: string, contenido: Buffer, mime: string): Promise<void>;
   leer(clave: string): Promise<Buffer | null>;
+  /** Solo para la limpieza de datos que hace el administrador (Base de datos → Limpiar). */
+  borrar(clave: string): Promise<void>;
 };
 
 const nube: Almacen = {
@@ -29,6 +31,9 @@ const nube: Almacen = {
     const r = await get(clave, { access: "private" });
     if (!r || r.statusCode !== 200) return null;
     return Buffer.from(await new Response(r.stream).arrayBuffer());
+  },
+  async borrar(clave) {
+    await del(clave);
   },
 };
 
@@ -49,6 +54,9 @@ const carpeta: Almacen = {
   },
   async leer(clave) {
     return readFile(rutaEnCarpeta(clave)).catch(() => null);
+  },
+  async borrar(clave) {
+    await unlink(rutaEnCarpeta(clave)).catch(() => undefined);
   },
 };
 
@@ -105,4 +113,23 @@ export async function guardarArchivo(archivo: File, opciones: { empresa: string;
 /** Contenido de un archivo registrado (la autorización la hace quien llama). */
 export async function leerContenido(archivo: { almacen: string; clave: string }): Promise<Buffer | null> {
   return almacenPorNombre(archivo.almacen).leer(archivo.clave);
+}
+
+/** Borra el contenido de archivos ya retirados de la base (limpieza del administrador). Ignora fallos. */
+export async function borrarContenidos(archivos: { almacen: string; clave: string }[]): Promise<number> {
+  let borrados = 0;
+  for (const a of archivos) {
+    try {
+      await almacenPorNombre(a.almacen).borrar(a.clave);
+      borrados++;
+    } catch (error) {
+      console.error("[borrarContenidos]", a.clave, error);
+    }
+  }
+  return borrados;
+}
+
+/** Guarda un archivo generado por el sistema (datos de ejemplo), con la misma validación por contenido. */
+export async function guardarArchivoInterno(contenido: Buffer, nombre: string, opciones: { empresa: string; usuario: number; soloImagen?: boolean }) {
+  return guardarArchivo(new File([new Uint8Array(contenido)], nombre), opciones);
 }

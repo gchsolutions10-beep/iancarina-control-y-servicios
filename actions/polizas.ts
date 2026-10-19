@@ -10,6 +10,7 @@ import { sumarAnios } from "@/lib/dominio/vigencias";
 import type { EstadoAccion } from "@/lib/estado-accion";
 import { codigoPg, sinPermiso } from "@/lib/fichas/acceso";
 import { recalcularPeriodo, resumirFaltantes } from "@/lib/polizas/calcular";
+import { Bloqueo, confirmarPeriodoTx } from "@/lib/polizas/operaciones";
 import { leerAsegurado, parteDeEmpresa, periodoEditable, siguienteEndoso, sujetoValido } from "@/lib/polizas/edicion";
 import { ROLES_PERIODO } from "@/lib/polizas/datos";
 import { hoyPlanta } from "@/lib/tiempo";
@@ -403,44 +404,9 @@ export async function confirmarPeriodo(_previo: EstadoAccion, fd: FormData): Pro
     const anterior = await db.poliza_periodos.findUnique({ where: { id: periodo.id_periodo_anterior } });
     if (anterior?.estado !== "confirmado") return { error: "Primero debe estar confirmado el período anterior." };
   }
-  const hoy = hoyPlanta();
   let mensaje: string;
   try {
-    mensaje = await db.$transaction(
-      async (tx) => {
-        const calculo = await recalcularPeriodo(tx, periodo.id, usuario.id);
-        const tomador = await tx.periodo_partes.findFirst({ where: { id_periodo: periodo.id, rol: "tomador" } });
-        if (!tomador) throw new Bloqueo("Falta el tomador.");
-        if (calculo.lineas === 0) throw new Bloqueo("El período no tiene asegurados.");
-        if (calculo.pendientes.length) throw new Bloqueo(`No se puede confirmar: falta ${resumirFaltantes(calculo.pendientes)}. Cárgalo en las tarifas o registra el importe de la aseguradora.`);
-
-        const lineas = await tx.inclusion_coberturas.findMany({ where: { inclusiones: { id_periodo: periodo.id } }, include: { coberturas: true } });
-        const total = lineas.filter((l) => !l.coberturas.incluida_en_padre).reduce((s, l) => s.plus(l.prima_periodo!.toString()), new Decimal(0));
-        const calculos = [...lineas.map((l) => l.id_calculo), ...(await tx.inclusiones.findMany({ where: { id_periodo: periodo.id }, select: { id_calculo_suma: true } })).map((i) => i.id_calculo_suma)].filter(
-          (x): x is bigint => x !== null,
-        );
-        await tx.calculos.updateMany({ where: { id: { in: calculos } }, data: { estado: "definitivo" } });
-        await tx.poliza_periodos.update({ where: { id: periodo.id }, data: { estado: "confirmado", confirmado_por: usuario.id, confirmado_en: new Date() } });
-
-        let detalle = "sin prima";
-        if (total.gt(0)) {
-          const o = await tx.obligaciones.create({
-            data: {
-              empresa: periodo.empresa, naturaleza: "por_pagar", concepto: "prima", id_contraparte: periodo.polizas.id_aseguradora, id_periodo: periodo.id, moneda: periodo.moneda,
-              fecha_emision: fecha(hoy < iso(periodo.vigencia_desde) ? hoy : iso(periodo.vigencia_desde)), fecha_vencimiento: fecha(fecha_vencimiento), documento,
-              descripcion: `Prima póliza ${periodo.polizas.numero}, período ${periodo.numero_periodo} (${iso(periodo.vigencia_desde)} a ${iso(periodo.vigencia_hasta)})`, creado_por: usuario.id,
-            },
-          });
-          await tx.obligacion_movimientos.create({ data: { empresa: periodo.empresa, id_obligacion: o.id, tipo: "cargo", monto: total.toFixed(2), fecha: o.fecha_emision, motivo: "Confirmación del período", creado_por: usuario.id } });
-          detalle = `prima por pagar ${total.toFixed(2)} ${periodo.moneda} (obligación ${o.id}, vence ${fecha_vencimiento})`;
-        }
-        await registrarGestion(usuario.id, MODULO, `PERÍODO ${periodo.id} | CONFIRMADO · ${lineas.length} coberturas · ${detalle}`, tx, {
-          empresa: periodo.empresa, entidad: "poliza_periodos", idRegistro: periodo.id, operacion: "CONFIRMAR",
-        });
-        return `Período confirmado: ${detalle}.`;
-      },
-      { timeout: 60_000 },
-    );
+    mensaje = await db.$transaction((tx) => confirmarPeriodoTx(tx, periodo, usuario.id, { fecha_vencimiento, documento }), { timeout: 60_000 });
   } catch (error) {
     if (error instanceof Bloqueo) {
       revalidatePath(rutaPeriodo(periodo.id));
@@ -453,8 +419,6 @@ export async function confirmarPeriodo(_previo: EstadoAccion, fd: FormData): Pro
   revalidatePath(rutaPeriodo(periodo.id));
   redirect(`${rutaPeriodo(periodo.id)}?hecho=${encodeURIComponent(mensaje)}`);
 }
-
-class Bloqueo extends Error {}
 
 /** Descarta un período en preparación (queda anulado con su motivo; no se borra). */
 export async function descartarPeriodo(_previo: EstadoAccion, fd: FormData): Promise<EstadoAccion> {
