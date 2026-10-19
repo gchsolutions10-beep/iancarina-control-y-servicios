@@ -30,11 +30,13 @@ export type Modulo = {
 export type Seccion = { nombre: string; modulos: Modulo[] };
 
 export type Area = {
-  /** También es la ruta de su pestaña: /personas, /polizas… */
+  /** También es la ruta de su pestaña: /gestion-polizas… */
   id: string;
   nombre: string;
   /** Nombre corto para la pestaña del menú. */
   pestana: string;
+  /** Rutas que pertenecen al área (la pestaña se marca activa en ellas). */
+  prefijos: string[];
   secciones: Seccion[];
 };
 
@@ -44,37 +46,24 @@ export type Area = {
  */
 export const AREAS: Area[] = [
   {
-    id: "personas",
-    nombre: "Personas y empresas",
-    pestana: "Personas",
+    id: "gestion-polizas",
+    nombre: "Gestión de Pólizas",
+    pestana: "Gestión de Pólizas",
+    prefijos: ["/gestion-polizas", "/personas", "/activos", "/polizas", "/siniestros", "/finanzas", "/reportes"],
     secciones: [
       {
-        nombre: "Personas",
+        nombre: "Personas y empresas",
         modulos: [
           { id: "personas", nombre: "Fichas de personas", descripcion: "Asegurados, beneficiarios, propietarios y organizaciones, con su historial", icono: Users, permiso: "seguros.ver", origen: "cys.personas", ruta: "/personas/fichas" },
         ],
       },
-    ],
-  },
-  {
-    id: "activos",
-    nombre: "Vehículos y propiedades",
-    pestana: "Activos",
-    secciones: [
       {
-        nombre: "Activos asegurables",
+        nombre: "Vehículos y propiedades",
         modulos: [
           { id: "vehiculos", nombre: "Vehículos", descripcion: "Flota propia y de terceros: ficha, propietario, fotos y documentos", icono: Car, permiso: "seguros.ver", origen: "cys.vehiculos", ruta: "/activos/vehiculos" },
           { id: "propiedades", nombre: "Propiedades", descripcion: "Casas, edificios e instalaciones asegurables", icono: Building, permiso: "seguros.ver", origen: "cys.propiedades", ruta: "/activos/propiedades" },
         ],
       },
-    ],
-  },
-  {
-    id: "polizas",
-    nombre: "Pólizas",
-    pestana: "Pólizas",
-    secciones: [
       {
         nombre: "Pólizas y renovaciones",
         modulos: [
@@ -82,41 +71,20 @@ export const AREAS: Area[] = [
           { id: "renovaciones", nombre: "Renovación anual", descripcion: "Nueva vigencia con comparación contra el año anterior", icono: RefreshCcw, permiso: "seguros.ver", origen: "cys.poliza_periodos", ruta: "/polizas/renovaciones" },
         ],
       },
-    ],
-  },
-  {
-    id: "siniestros",
-    nombre: "Siniestros",
-    pestana: "Siniestros",
-    secciones: [
       {
-        nombre: "Expedientes",
+        nombre: "Siniestros",
         modulos: [
           { id: "siniestros", nombre: "Siniestros", descripcion: "Expedientes de personas, vehículos y propiedades con sus etapas", icono: AlertTriangle, permiso: "seguros.ver", origen: "cys.siniestros", ruta: "/siniestros/lista" },
           { id: "transporte", nombre: "Transporte contratado", descripcion: "Pérdidas de mercancía con transportistas externos", icono: Truck, permiso: "seguros.ver", origen: "cys.siniestro_transporte", ruta: "/siniestros/lista?sujeto=transporte" },
         ],
       },
-    ],
-  },
-  {
-    id: "finanzas",
-    nombre: "Finanzas",
-    pestana: "Finanzas",
-    secciones: [
       {
-        nombre: "Pagos y cobros",
+        nombre: "Finanzas",
         modulos: [
           { id: "primas-por-pagar", nombre: "Primas por pagar", descripcion: "Obligaciones con las aseguradoras, pagos parciales y devoluciones por bajas", icono: Wallet, permiso: "seguros.ver", origen: "cys.vw_saldos_obligaciones", ruta: "/finanzas/primas" },
           { id: "cuentas-por-cobrar", nombre: "Cuentas por cobrar", descripcion: "Reembolsos de siniestros y devoluciones de prima: reconocidos, pendientes y cobrados", icono: HandCoins, permiso: "seguros.ver", origen: "cys.vw_saldos_obligaciones", ruta: "/finanzas/primas?ver=cobrar" },
         ],
       },
-    ],
-  },
-  {
-    id: "reportes",
-    nombre: "Reportes",
-    pestana: "Reportes",
-    secciones: [
       {
         nombre: "Indicadores y reportes",
         modulos: [
@@ -127,4 +95,5 @@ export const AREAS: Area[] = [
       },
     ],
   },
+  // Próximamente: área «Presupuestos» con su propio permiso, para analistas que solo trabajan ahí.
 ];

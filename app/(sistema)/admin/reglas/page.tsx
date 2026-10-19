@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { cambiarEstadoRegla, nuevaVersionRegla } from "@/actions/reglas";
+import { cambiarEstadoRegla, deshacerVersionRegla, nuevaVersionRegla } from "@/actions/reglas";
 import { AyudaModulo } from "@/components/ayuda/ayuda-modulo";
 import { Encabezado, Tabla } from "@/components/fichas/piezas";
 import { BotonAccion } from "@/components/formularios/boton-accion";
@@ -71,9 +71,23 @@ export default async function Reglas() {
               r.usos,
               r.estado !== "retirada" && !r.vigente_hasta ? (
                 <div key="a" className="flex min-w-56 flex-col items-start gap-2">
-                  {r.estado === "propuesta" && (
+                  {r.estado === "propuesta" ? (
                     <BotonAccion accion={cambiarEstadoRegla} ocultos={{ id: String(r.id), estado: "aprobada" }}>
                       Aprobar
+                    </BotonAccion>
+                  ) : (
+                    <BotonAccion accion={cambiarEstadoRegla} ocultos={{ id: String(r.id), estado: "propuesta" }} variante="fantasma">
+                      Volver a propuesta
+                    </BotonAccion>
+                  )}
+                  {r.id_regla_anterior !== null && r.usos === 0 && (
+                    <BotonAccion
+                      accion={deshacerVersionRegla}
+                      ocultos={{ id: String(r.id) }}
+                      variante="fantasma"
+                      confirmar={`¿Deshacer la v${r.version}? Se retira y la versión anterior vuelve a valer sin fecha de fin.`}
+                    >
+                      Deshacer versión
                     </BotonAccion>
                   )}
                   <details>

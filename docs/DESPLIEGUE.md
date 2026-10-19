@@ -59,9 +59,10 @@ Rama de trabajo → PR a `main` → merge. Vercel publica solo y aplica las migr
 Las ramas que no son `main` generan una *Preview*; si comparten la base, también la migran. Para
 aislarlas, crea en Neon una rama `pruebas` y pon su cadena en las variables de *Preview*.
 
-## 5. Producción en la intranet (Etapa 6)
+## 5. Producción en el servidor de la empresa (Etapa 6)
 
-Node 22 LTS, PostgreSQL del cliente, `npm ci && npm run db:migrar && npm run build && npm start`,
-mismas variables (sin `PREPARAR_DEMO`; `SESSION_COOKIE_SECURE=false` si no hay HTTPS), más
-`ALMACEN=carpeta` y `ARCHIVOS_RUTA_BASE` (carpeta compartida montada en el servidor, con permiso de
-lectura y escritura para el usuario del servicio).
+Guía paso a paso para principiantes: **`docs/INSTALACION-SERVIDOR.md`** (Windows y Linux).
+Resumen: Node 22 LTS + PostgreSQL de la empresa, `.env` desde `.env.servidor.example`,
+`npm ci && npm run instalar && npm run build`, PM2 con `ecosystem.config.cjs`, respaldo diario con
+`scripts/windows/respaldar.ps1` y actualizaciones con `scripts/windows/actualizar.ps1`.
+`npm run verificar` revisa la instalación sin cambiar nada.

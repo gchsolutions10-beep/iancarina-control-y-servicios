@@ -478,7 +478,7 @@ export async function polizasDe(empresa: string, ficha: { persona?: number; vehi
 export async function reglasCalculo() {
   const filas = await db.reglas_calculo.findMany({
     orderBy: [{ tipo: "asc" }, { nombre: "asc" }, { version: "desc" }],
-    include: { ramos: { select: { nombre: true } }, coberturas: { select: { nombre: true } }, partes: { select: { razon_social: true } }, polizas: { select: { numero: true } }, _count: { select: { calculos: true } } },
+    include: { ramos: { select: { nombre: true } }, coberturas: { select: { nombre: true } }, partes: { select: { razon_social: true } }, polizas: { select: { numero: true } }, _count: { select: { calculos: true, endoso_lineas: true } } },
   });
   return filas.map((r) => ({
     id: r.id,
@@ -497,6 +497,8 @@ export async function reglasCalculo() {
     vigente_desde: iso(r.vigente_desde),
     vigente_hasta: r.vigente_hasta ? iso(r.vigente_hasta) : null,
     descripcion: r.descripcion,
-    usos: r._count.calculos,
+    id_regla_anterior: r.id_regla_anterior,
+    /** Cálculos de prima y líneas de endoso (prorrateo) hechos con esta versión. */
+    usos: r._count.calculos + r._count.endoso_lineas,
   }));
 }

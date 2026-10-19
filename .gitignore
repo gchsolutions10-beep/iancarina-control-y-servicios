@@ -45,3 +45,4 @@ next-env.d.ts
 
 # env: se versiona solo la plantilla
 !.env.example
+!.env.servidor.example

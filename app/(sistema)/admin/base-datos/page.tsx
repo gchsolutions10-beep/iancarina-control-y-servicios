@@ -11,7 +11,7 @@ import { ejemplosPermitidos } from "@/lib/demo/cargar";
 import { listarEmpresas } from "@/lib/empresas";
 import { formatearEntero } from "@/lib/formato";
 
-export const metadata: Metadata = { title: "Base de datos" };
+export const metadata: Metadata = { title: "Programador" };
 // La carga de ejemplos sube fotos y calcula varias pólizas (unos segundos); 60 s es el máximo del plan de Vercel.
 export const maxDuration = 60;
 
