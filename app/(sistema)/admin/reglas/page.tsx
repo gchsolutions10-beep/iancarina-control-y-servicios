@@ -107,6 +107,10 @@ export default async function Reglas() {
                     </FormularioAccion>
                   </details>
                 </div>
+              ) : r.estado !== "retirada" ? (
+                <p key="h" className="max-w-56 text-xs text-tinta-tenue">
+                  Reemplazada por la v{r.version + 1}. Para que esta vuelva a valer (y poder cambiar su estado), use «Deshacer versión» en la v{r.version + 1}, si todavía no se usó.
+                </p>
               ) : null,
             ])}
           />
