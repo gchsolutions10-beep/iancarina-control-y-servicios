@@ -146,7 +146,16 @@ export async function cargarEjemplos(empresa: string, usuario: number): Promise<
           }),
         );
       }
-      r.personas = personas.length;
+      // Un duplicado a propósito (para mostrar Personas duplicadas): misma cédula con otra letra y un
+      // apellido mal escrito; trae la dirección que a la ficha original le falta.
+      const original = personas[4];
+      await tx.partes.create({
+        data: {
+          empresa, tipo: "natural", tipo_identificacion: "E", numero_identificacion: `${90000001 + 4}`, nombres: original.nombres,
+          apellidos: `${original.apellidos!.slice(0, -1)}S`, direccion: "Av. Principal, Maracay (DEMO)", observaciones: `${NOTA} Duplicado de ejemplo.`, creado_por: usuario,
+        },
+      });
+      r.personas = personas.length + 1;
 
       const vehiculos = [];
       for (const [i, v] of FLOTA.entries()) {

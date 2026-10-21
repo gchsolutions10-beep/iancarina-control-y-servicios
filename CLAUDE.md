@@ -79,7 +79,8 @@ del sistema (login, usuarios, ajustes, componentes) se copió de ahí y ya no se
       menú por áreas, bitácora inmutable, tema, despliegue en Vercel + Neon (`docs/DESPLIEGUE.md`)
 - [x] Etapa 2: personas y empresas (`docs/modulos/personas.md`; sin socios ni acciones), vehículos y propiedades con
       titulares y bajas, documentos y fotos en Blob privado / carpeta (`docs/modulos/activos.md`), catálogos
-- [ ] Etapa 2b: consolidar personas duplicadas (fusión) — cuando haya pólizas que reapuntar
+- [x] Etapa 2b: personas duplicadas: candidatos, comparación, fusión que reapunta todo (también pólizas
+      confirmadas y pagos) con registro y reversión (`docs/modulos/personas.md`)
 - [x] Etapa 3: pólizas con vigencias, asegurados, coberturas, tarifas y beneficiarios; motor de cálculo
       con reglas versionadas (propuesta de mercado marcada «Propuesta»); endosos de alta, baja y cambios;
       renovación anual con elegibilidad y comparación; primas por pagar con pagos parciales y anulación

@@ -20,6 +20,7 @@ export async function guardarParte(_previo: EstadoAccion, fd: FormData): Promise
   const id = Number(texto(fd, "id")) || null;
   const anterior = id ? await db.partes.findUnique({ where: { id: BigInt(id) } }) : null;
   if (id && !anterior) return { error: "La ficha ya no existe." };
+  if (anterior?.estado === "fusionada") return { error: "Esta ficha se fusionó en otra: los cambios se hacen en la ficha que quedó." };
   const empresa = anterior?.empresa ?? texto(fd, "empresa");
   const negado = sinPermiso(usuario, empresa, "seguros.registrar");
   if (negado) return { error: negado };
