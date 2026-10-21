@@ -49,6 +49,9 @@ const ESTADOS: Record<string, { texto: string; tono: "ok" | "neutro" | "baja" | 
   pendiente: { texto: "Pendiente", tono: "neutro", icono: Clock },
   anulada: { texto: "Anulada", tono: "neutro", icono: CircleMinus },
   baja: { texto: "Dado de baja", tono: "baja", icono: CircleX },
+  // Personas duplicadas
+  fusionada: { texto: "Fusionada", tono: "neutro", icono: CircleMinus },
+  revertida: { texto: "Revertida", tono: "neutro", icono: CircleMinus },
   // Siniestros (prefijo sin_ para no chocar con otros estados)
   sin_sin_movimiento: { texto: "Sin movimiento", tono: "baja", icono: TriangleAlert },
   sin_abierto: { texto: "Abierto", tono: "aviso", icono: Clock },

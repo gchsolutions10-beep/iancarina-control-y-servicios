@@ -294,6 +294,28 @@ const lista: Guia[] = [
     evitar: ["No cambie el CECO en el Excel: el reparto debe salir del sistema para que cuadre con las pólizas."],
   },
   {
+    id: "duplicados",
+    titulo: "Personas duplicadas",
+    quien: "El administrador o quien tenga «Anular y ajustar» en la empresa.",
+    para: "Dejar una sola ficha por persona o empresa cuando se registró dos veces, sin perder pólizas, siniestros, pagos ni documentos.",
+    pasos: [
+      "Revise la lista de posibles duplicados (mismo número de identificación o nombre muy parecido), o abra una ficha y pulse «Fusionar con otra ficha».",
+      "Pulse «Comparar»: a la izquierda la ficha duplicada, a la derecha la que queda. Use «Intercambiar» si debe quedar la otra.",
+      "Revise qué registros se mueven y qué datos se completan, escriba el motivo, marque la confirmación y pulse «Fusionar fichas».",
+      "Si no son la misma persona, pulse «No son la misma» y el par no vuelve a proponerse.",
+    ],
+    tener: [
+      "Nada se borra: la ficha duplicada queda «Fusionada», se puede consultar y apunta a la que quedó.",
+      "Se mueven también los registros de pólizas confirmadas, pagos y siniestros; todo queda en la bitácora de ambas fichas.",
+      "La ficha que queda toma de la otra los datos que le falten (teléfono, correo, dirección, fecha de nacimiento) y sus funciones.",
+      "Para deshacerla: «Fusiones registradas» → «Revertir». Los registros vuelven a la ficha original; lo cargado después en la que quedó se queda ahí.",
+    ],
+    evitar: [
+      "No fusione si las dos fichas están en la misma póliza con fechas que se cruzan: el sistema lo impide; primero dé de baja una por endoso.",
+      "No fusione personas que solo se llaman parecido: compare la identificación y la fecha de nacimiento.",
+    ],
+  },
+  {
     id: "ajustes",
     titulo: "Ajustes",
     quien: "El administrador (y GCH para los ajustes técnicos).",

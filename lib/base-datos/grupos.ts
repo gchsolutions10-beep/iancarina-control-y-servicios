@@ -76,9 +76,11 @@ export const GRUPOS = {
   },
   personas: {
     titulo: "Personas y organizaciones",
-    detalle: "Fichas de personas, aseguradoras, talleres y demás organizaciones, con sus documentos.",
+    detalle: "Fichas de personas, aseguradoras, talleres y demás organizaciones, con sus documentos y el registro de fusiones de duplicados.",
     requiere: ["activos"],
     pasos: [
+      { tabla: "fusiones_personas", protegida: true },
+      { tabla: "personas_distintas" },
       { tabla: "documentos", donde: "id_parte IS NOT NULL" },
       { tabla: "partes" },
     ],

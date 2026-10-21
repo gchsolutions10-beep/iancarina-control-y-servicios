@@ -6,6 +6,7 @@ import {
   Car,
   FileSpreadsheet,
   FileText,
+  GitMerge,
   HandCoins,
   LayoutDashboard,
   RefreshCcw,
@@ -55,6 +56,7 @@ export const AREAS: Area[] = [
         nombre: "Personas y empresas",
         modulos: [
           { id: "personas", nombre: "Fichas de personas", descripcion: "Asegurados, beneficiarios, propietarios y organizaciones, con su historial", icono: Users, permiso: "seguros.ver", origen: "cys.personas", ruta: "/personas/fichas" },
+          { id: "duplicados", nombre: "Personas duplicadas", descripcion: "Comparar fichas repetidas, fusionarlas sin perder historial y revertir", icono: GitMerge, permiso: "movimientos.anular", origen: "cys.fusiones_personas", ruta: "/personas/duplicados" },
         ],
       },
       {

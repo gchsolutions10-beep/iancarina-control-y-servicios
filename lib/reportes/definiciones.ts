@@ -33,7 +33,7 @@ const empresasDe = (ctx: Contexto, v: Record<string, string>) => (v.empresa && c
 const filtroEmpresa = (ctx: Contexto): Filtro[] => (ctx.opcionesEmpresa.length > 1 ? [{ clave: "empresa", etiqueta: "Empresa", tipo: "lista", opciones: ctx.opcionesEmpresa, todos: "Todas" }] : []);
 const opcionesRamos = async () => (await db.ramos.findMany({ orderBy: { nombre: "asc" } })).map((r) => ({ valor: String(r.id), etiqueta: r.nombre }));
 const aseguradoras = async (empresas: string[]) =>
-  (await db.partes.findMany({ where: { empresa: { in: empresas }, funciones: { has: "Aseguradora" } }, orderBy: { razon_social: "asc" }, select: { id: true, razon_social: true } })).map((p) => ({ valor: String(p.id), etiqueta: p.razon_social ?? "" }));
+  (await db.partes.findMany({ where: { empresa: { in: empresas }, estado: { not: "fusionada" }, funciones: { has: "Aseguradora" } }, orderBy: { razon_social: "asc" }, select: { id: true, razon_social: true } })).map((p) => ({ valor: String(p.id), etiqueta: p.razon_social ?? "" }));
 
 // ---------------------------------------------------------------- pólizas y vigencias
 const polizas: Reporte = {
