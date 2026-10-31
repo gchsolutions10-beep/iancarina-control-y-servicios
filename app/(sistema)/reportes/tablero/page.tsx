@@ -10,6 +10,7 @@ import { FormularioFiltros } from "@/components/reportes/formulario-filtros";
 import { GraficaBarras } from "@/components/reportes/grafica-barras";
 import { requerirSesion } from "@/lib/auth/dal";
 import { guia } from "@/lib/ayuda/guias";
+import { slugRecorrido } from "@/lib/ayuda/recorridos";
 import { empresasDe } from "@/lib/fichas/acceso";
 import { leerFiltros } from "@/lib/fichas/filtros";
 import { formatearEntero, formatearImporte } from "@/lib/formato";
@@ -36,7 +37,7 @@ function PorMoneda({ valores }: { valores: Record<string, string> }) {
 
 function Tarjeta({ titulo, detalle, children }: { titulo: string; detalle?: string; children: ReactNode }) {
   return (
-    <section className="min-w-0 rounded-xl border border-borde bg-superficie p-4 shadow-xs sm:p-5">
+    <section data-recorrido={`seccion-${slugRecorrido(titulo)}`} className="min-w-0 rounded-xl border border-borde bg-superficie p-4 shadow-xs sm:p-5">
       <h2 className="font-semibold text-tinta">{titulo}</h2>
       {detalle && <p className="mt-0.5 text-xs text-tinta-tenue">{detalle}</p>}
       <div className="mt-4">{children}</div>
@@ -69,7 +70,7 @@ export default async function Tablero({ searchParams }: PageProps<"/reportes/tab
         </FormularioFiltros>
       )}
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div data-recorrido="indicadores" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Indicador etiqueta="Pólizas vigentes" valor={formatearEntero(d.polizasVigentes)} detalle={`${formatearEntero(d.asegurados)} asegurados hoy`} />
         <Indicador etiqueta="Prima neta de las vigencias" valor={<PorMoneda valores={d.prima} />} detalle="Inicial + endosos confirmados" />
         <Indicador etiqueta="Suma asegurada vigente" valor={<PorMoneda valores={d.suma} />} />

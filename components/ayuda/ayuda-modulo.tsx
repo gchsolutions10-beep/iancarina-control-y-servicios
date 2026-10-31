@@ -1,7 +1,10 @@
 "use client";
 
 import { useRef } from "react";
-import { Info, X } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Info, Route, X } from "lucide-react";
+import { EVENTO_INICIAR } from "@/components/sistema/recorridos";
+import { recorridoDe } from "@/lib/ayuda/recorridos";
 import { claseBoton } from "@/components/ui/boton";
 import type { Guia } from "@/lib/ayuda/tipos";
 
@@ -47,11 +50,13 @@ export function ContenidoGuia({ guia }: { guia: Guia }) {
 /** Botón «i» del encabezado de cada módulo: abre la guía de uso de ese formulario. */
 export function AyudaModulo({ guia }: { guia: Guia }) {
   const dialogo = useRef<HTMLDialogElement>(null);
+  const conRecorrido = recorridoDe(usePathname()) !== null;
   return (
     <>
       <button
         type="button"
         onClick={() => dialogo.current?.showModal()}
+        data-recorrido="ayuda"
         aria-label={`Guía de uso: ${guia.titulo}`}
         title="Guía de uso"
         className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-borde bg-superficie text-tinta-suave shadow-xs transition-colors duration-150 ease-suave hover:text-tinta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca-600/40"
@@ -75,7 +80,19 @@ export function AyudaModulo({ guia }: { guia: Guia }) {
         <div className="mt-3">
           <ContenidoGuia guia={guia} />
         </div>
-        <footer className="mt-6 flex justify-end gap-2 border-t border-borde pt-4">
+        <footer className="mt-6 flex flex-wrap justify-end gap-2 border-t border-borde pt-4">
+          {conRecorrido && (
+            <button
+              type="button"
+              onClick={() => {
+                dialogo.current?.close();
+                window.dispatchEvent(new Event(EVENTO_INICIAR));
+              }}
+              className={claseBoton("secundario", "md")}
+            >
+              <Route className="size-4" aria-hidden /> Ver el recorrido de esta pantalla
+            </button>
+          )}
           <button type="button" onClick={() => dialogo.current?.close()} className={claseBoton("secundario", "md")}>
             Entendido
           </button>

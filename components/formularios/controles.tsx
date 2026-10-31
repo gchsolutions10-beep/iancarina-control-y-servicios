@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { Campo, claseControl } from "@/components/ui/campo";
 import { cn } from "@/lib/cn";
+import { slugRecorrido } from "@/lib/ayuda/recorridos";
 
 type Base = {
   nombre: string;
@@ -86,7 +87,7 @@ export function CampoSelect({ opciones, vacio = "Selecciona…", ...p }: Base & 
 
 export function Seccion({ titulo, descripcion, children, accion }: { titulo: string; descripcion?: string; children: ReactNode; accion?: ReactNode }) {
   return (
-    <section className="rounded-xl border border-borde bg-superficie p-5 shadow-xs sm:p-6">
+    <section data-recorrido={`seccion-${slugRecorrido(titulo)}`} className="rounded-xl border border-borde bg-superficie p-5 shadow-xs sm:p-6">
       <header className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="font-medium text-tinta">{titulo}</h2>

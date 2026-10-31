@@ -99,7 +99,7 @@ export default async function PaginaReporte({ params, searchParams }: PageProps<
       </p>
 
       {resultado.filas.length > 0 && (
-        <div className="mt-3 overflow-x-auto rounded-lg border border-borde print:overflow-visible print:border-0">
+        <div data-recorrido="tabla" className="mt-3 overflow-x-auto rounded-lg border border-borde print:overflow-visible print:border-0">
           <table className="w-full min-w-[48rem] text-left text-sm print:min-w-0 print:text-[10px]">
             <thead className="bg-superficie-2 text-xs text-tinta-suave">
               <tr>

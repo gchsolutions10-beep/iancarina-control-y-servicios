@@ -23,6 +23,7 @@ export function FormularioFiltros({ accion, etiqueta, children }: { accion: stri
 
   return (
     <form
+      data-recorrido="filtros"
       method="get"
       action={accion}
       aria-label={etiqueta}

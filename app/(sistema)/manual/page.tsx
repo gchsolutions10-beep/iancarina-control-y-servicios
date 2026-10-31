@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { BookOpen } from "lucide-react";
 import { ContenidoGuia } from "@/components/ayuda/ayuda-modulo";
+import { RecorridosManual } from "@/components/ayuda/recorridos-manual";
 import { GUIAS, REGLAS_GENERALES } from "@/lib/ayuda/guias";
 import type { Guia } from "@/lib/ayuda/tipos";
 import { areasVisibles } from "@/lib/auth/areas-visibles";
@@ -39,8 +40,13 @@ export default async function Manual() {
       </header>
 
       <div className="grid gap-8 lg:grid-cols-[14rem_1fr]">
-        <nav aria-label="Contenido del manual" className="lg:sticky lg:top-24 lg:self-start">
+        <nav data-recorrido="indice-manual" aria-label="Contenido del manual" className="lg:sticky lg:top-24 lg:self-start">
           <ol className="flex flex-col gap-3 text-sm">
+            <li>
+              <a href="#recorridos" className="font-medium text-tinta hover:text-marca-600 dark:hover:text-marca-400">
+                Recorridos guiados
+              </a>
+            </li>
             <li>
               <a href="#reglas-generales" className="font-medium text-tinta hover:text-marca-600 dark:hover:text-marca-400">
                 Reglas generales
@@ -64,6 +70,7 @@ export default async function Manual() {
         </nav>
 
         <div className="flex min-w-0 flex-col gap-6">
+          <RecorridosManual />
           <section id="reglas-generales" className="scroll-mt-24 rounded-xl border border-borde bg-superficie p-6 shadow-xs">
             <h2 className="text-lg font-semibold text-tinta">Reglas generales</h2>
             <ul className="mt-3 flex flex-col gap-1.5 text-sm text-tinta-suave">

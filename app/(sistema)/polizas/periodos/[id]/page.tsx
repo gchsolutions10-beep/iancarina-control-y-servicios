@@ -120,7 +120,7 @@ export default async function PeriodoPoliza({ params, searchParams }: PageProps<
         )}
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <div data-recorrido="indicadores" className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
         <Indicador etiqueta="Asegurados vigentes" valor={resumen.asegurados} />
         <Indicador etiqueta="Suma asegurada" valor={formatearImporte(resumen.sumaAsegurada, m)} />
         <Indicador

@@ -6,7 +6,7 @@ import type { Area, Modulo } from "@/lib/modulos";
 /** Secciones de una empresa con las tarjetas de sus módulos (Inicio y pestaña de la empresa). */
 export function SeccionesArea({ area, className }: { area: Area; className?: string }) {
   return (
-    <div className={cn("flex flex-col gap-8", className)}>
+    <div data-recorrido="modulos" className={cn("flex flex-col gap-8", className)}>
       {area.secciones.map((seccion) => (
         <div key={seccion.nombre}>
           <h3 className="mb-3 text-xs font-medium tracking-wide text-tinta-tenue uppercase">{seccion.nombre}</h3>

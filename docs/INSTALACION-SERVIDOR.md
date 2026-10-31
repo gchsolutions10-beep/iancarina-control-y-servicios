@@ -88,6 +88,26 @@ Las tablas no se crean a mano: las crea el paso 7.
 2. Esa carpeta debe incluirse en los **respaldos** de la empresa (paso 10): ahí quedan las pólizas,
    recibos y fotos que se suban.
 
+**Cómo se guardan las fotos y documentos.** La base de datos **no** guarda los archivos: guarda solo
+sus datos (nombre, tipo, tamaño, quién lo subió y una huella para comprobar que no cambió). El archivo
+va a esta carpeta, ordenado por empresa y mes, con un nombre interno que nadie puede adivinar:
+
+```
+D:\SegurosArchivos\
+   mary-iancarina\
+      2026-11\
+         3f2a9c1e-…-b7d4.jpg      ← foto de un vehículo
+         9b10e4aa-…-0c21.pdf      ← cuadro de póliza
+```
+
+- Los usuarios nunca abren la carpeta: ven y descargan los archivos desde el sistema, que antes revisa
+  si tienen permiso en esa empresa (los documentos confidenciales solo los ve quien tiene el permiso).
+- No mueva ni renombre archivos a mano: el sistema los busca por su nombre interno.
+- El tamaño máximo por archivo se cambia en **Configuración → Ajustes** (en el servidor puede pasar de 4 MB).
+- Si TI prefiere una carpeta compartida de otro servidor, puede usarse siempre que el usuario de
+  Windows que ejecuta el sistema tenga permiso de lectura y escritura; lo más sencillo es un disco del
+  mismo servidor con copia diaria a otro lado.
+
 ## Paso 5. Instalar las piezas del sistema
 
 ```powershell
