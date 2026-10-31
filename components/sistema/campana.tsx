@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AlertTriangle, Bell, FileText, HandCoins, Wallet } from "lucide-react";
+import { EVENTO_ACTIVO } from "@/components/sistema/recorridos";
 import { claseBoton } from "@/components/ui/boton";
 import type { Aviso } from "@/lib/avisos/reglas";
 import { cn } from "@/lib/cn";
@@ -28,7 +29,8 @@ export function Campana({ abrirSola }: { abrirSola: boolean }) {
       if (!r.ok) return;
       const { avisos: lista } = (await r.json()) as { avisos: Aviso[] };
       setAvisos(lista);
-      if (abrirSola && lista.some((a) => a.gravedad === "vencido")) {
+      // No se abre sola encima de un recorrido guiado.
+      if (abrirSola && lista.some((a) => a.gravedad === "vencido") && !document.documentElement.hasAttribute("data-recorrido-activo")) {
         let mostrados = false;
         try {
           mostrados = sessionStorage.getItem(CLAVE_SESION) === "1";
@@ -55,6 +57,12 @@ export function Campana({ abrirSola }: { abrirSola: boolean }) {
   }, [cargar]);
 
   useEffect(() => {
+    const cerrar = () => setAbierta(false);
+    window.addEventListener(EVENTO_ACTIVO, cerrar);
+    return () => window.removeEventListener(EVENTO_ACTIVO, cerrar);
+  }, []);
+
+  useEffect(() => {
     if (!abierta) return;
     const fuera = (e: MouseEvent) => {
       if (caja.current && !caja.current.contains(e.target as Node)) setAbierta(false);
@@ -72,7 +80,7 @@ export function Campana({ abrirSola }: { abrirSola: boolean }) {
   const vencidos = avisos?.filter((a) => a.gravedad === "vencido").length ?? 0;
 
   return (
-    <div ref={caja} className="relative">
+    <div ref={caja} data-recorrido="avisos" className="relative">
       <button
         type="button"
         onClick={() => setAbierta((v) => !v)}

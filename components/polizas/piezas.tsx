@@ -12,7 +12,7 @@ export function TarjetasControl({ tarjetas, activo, enlace }: {
   enlace: (estado: string) => string;
 }) {
   return (
-    <nav aria-label="Filtrar por estado" className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+    <nav data-recorrido="tarjetas" aria-label="Filtrar por estado" className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
       {tarjetas.map((t) => {
         const seleccionada = activo === t.valor;
         return (

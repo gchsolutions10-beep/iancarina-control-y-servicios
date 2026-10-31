@@ -18,7 +18,7 @@ export default async function ListaReportes() {
   return (
     <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">
       <Encabezado titulo="Reportes" subtitulo="Elija un reporte, combine los filtros y expórtelo a Excel o imprímalo como PDF." ayuda={<AyudaModulo guia={guia("reportes")} />} />
-      <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
+      <ul data-recorrido="tabla-reportes" className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {[{ id: "tablero", titulo: "Tablero gerencial", descripcion: "Primas y sumas aseguradas vigentes, saldos, siniestros por mes y próximos vencimientos.", href: "/reportes/tablero" }, ...REPORTES.map((r) => ({ id: r.id, titulo: r.titulo, descripcion: r.descripcion, href: `/reportes/${r.id}` }))].map((r) => (
           <li key={r.id}>
             <Link href={r.href} className="group flex h-full items-start gap-3 rounded-xl border border-borde bg-superficie px-4 py-4 shadow-xs transition-colors hover:border-borde-fuerte hover:bg-superficie-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca-600/40">

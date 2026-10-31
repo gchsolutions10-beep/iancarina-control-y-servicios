@@ -65,6 +65,10 @@ del sistema (login, usuarios, ajustes, componentes) se copió de ahí y ya no se
 - Menú corto: Inicio · una pestaña por área (`lib/modulos.ts`: hoy «Gestión de Pólizas»; luego
   «Presupuestos» con su propio permiso) · Configuración (`lib/configuracion.ts`) · Programador (base de
   datos, solo administrador) · Manual (`/manual`, guías de `lib/ayuda/guias.ts` filtradas por permisos).
+- Cada pantalla tiene su **recorrido guiado** en `lib/ayuda/recorridos.ts` (se abre solo la primera vez,
+  se salta y se repite desde «i» o el Manual; vistos en `cys.app_recorridos_vistos`). Pantalla nueva →
+  su recorrido y sus anclas `data-recorrido` (`tests/recorridos.test.ts` lo exige para cada módulo).
+- Guion para presentar la demo: `docs/GUION-DEMO.md`.
 - Toda escritura: sesión → permiso **en la empresa** del registro → Zod → transacción con bitácora
   (`registrarGestion(..., { empresa, entidad, idRegistro, operacion })` alimenta el «Historial» de cada ficha).
 - Formularios: `components/formularios/formulario-accion.tsx` (errores por campo, no reinicia lo escrito).

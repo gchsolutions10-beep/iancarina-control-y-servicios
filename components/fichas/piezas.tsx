@@ -16,12 +16,12 @@ export function Encabezado({ volver, titulo, subtitulo, ayuda, acciones }: { vol
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
           <div className="min-w-0">
-            <h1 className="text-2xl font-semibold tracking-tight text-balance text-tinta sm:text-3xl">{titulo}</h1>
+            <h1 data-recorrido="titulo" className="text-2xl font-semibold tracking-tight text-balance text-tinta sm:text-3xl">{titulo}</h1>
             {subtitulo && <p className="mt-1 text-sm text-tinta-suave">{subtitulo}</p>}
           </div>
           {ayuda}
         </div>
-        {acciones}
+        {acciones && <div data-recorrido="acciones">{acciones}</div>}
       </div>
     </header>
   );
@@ -101,7 +101,7 @@ export function Datos({ filas }: { filas: [string, ReactNode][] }) {
 export function Tabla({ columnas, filas, vacio }: { columnas: string[]; filas: ReactNode[][]; vacio: string }) {
   if (filas.length === 0) return <p className="rounded-lg border border-dashed border-borde-fuerte px-4 py-6 text-center text-sm text-tinta-suave">{vacio}</p>;
   return (
-    <div className="overflow-x-auto rounded-lg border border-borde">
+    <div data-recorrido="tabla" className="overflow-x-auto rounded-lg border border-borde">
       <table className="w-full min-w-[36rem] text-left text-sm">
         <thead className="bg-superficie-2 text-xs text-tinta-suave">
           <tr>

@@ -18,7 +18,7 @@ export default async function Configuracion() {
         <h1 className="text-2xl font-semibold tracking-tight text-tinta sm:text-3xl">Configuración</h1>
         <p className="mt-1 text-sm text-tinta-suave">Quién entra al sistema y cómo se comporta. Todo cambio queda en la bitácora.</p>
       </header>
-      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <ul data-recorrido="opciones-configuracion" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {opciones.map(({ id, nombre, descripcion, ruta, icono: Icono }) => (
           <li key={id}>
             <Link

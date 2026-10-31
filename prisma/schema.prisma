@@ -170,6 +170,7 @@ model app_usuarios {
   creado_por                                                           Int?
   actualizado_en                                                       DateTime                 @default(now()) @db.Timestamptz(6)
   app_ajustes                                                          app_ajustes[]
+  app_recorridos_vistos                                                app_recorridos_vistos[]
   empresas_asignadas                                                   app_usuario_empresas[]   @relation("app_usuario_empresas_asignado_por")
   empresas                                                             app_usuario_empresas[]   @relation("app_usuario_empresas_id_usuario")
   permisos_asignados                                                   app_usuario_permisos[]   @relation("app_usuario_permisos_asignado_por")
@@ -1157,5 +1158,15 @@ model personas_distintas {
   partes_personas_distintas_empresa_id_bTopartes partes       @relation("personas_distintas_empresa_id_bTopartes", fields: [empresa, id_b], references: [empresa, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([empresa, id_a, id_b])
+  @@schema("cys")
+}
+
+model app_recorridos_vistos {
+  id_usuario   Int
+  recorrido    String       @db.VarChar(60)
+  visto_en     DateTime     @default(now()) @db.Timestamptz(6)
+  app_usuarios app_usuarios @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([id_usuario, recorrido])
   @@schema("cys")
 }

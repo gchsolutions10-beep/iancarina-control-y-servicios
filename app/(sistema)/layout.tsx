@@ -4,6 +4,8 @@ import { cerrarSesion } from "@/actions/auth";
 import { CreditoGch } from "@/components/marca/credito-gch";
 import { Logo } from "@/components/marca/logo";
 import { Campana } from "@/components/sistema/campana";
+import { Recorridos } from "@/components/sistema/recorridos";
+import { db } from "@/lib/db";
 import { Navegacion, type EnlaceNavegacion } from "@/components/sistema/navegacion";
 import { claseBoton } from "@/components/ui/boton";
 import { SelectorTema } from "@/components/ui/selector-tema";
@@ -21,6 +23,7 @@ export default async function LayoutSistema({ children }: LayoutProps<"/">) {
   // Menú corto: Inicio, una pestaña por área (hoy «Gestión de Pólizas»; luego «Presupuestos»),
   // Configuración, Programador (solo administrador) y Manual.
   const configuracion = opcionesConfiguracion(usuario);
+  const vistos = (await db.app_recorridos_vistos.findMany({ where: { id_usuario: usuario.id }, select: { recorrido: true } })).map((r) => r.recorrido);
   const enlaces: EnlaceNavegacion[] = [
     { href: "/inicio", etiqueta: "Inicio" },
     ...areasVisibles(usuario).map((a) => ({ href: `/${a.id}`, etiqueta: a.pestana, activoEn: a.prefijos })),
@@ -68,6 +71,7 @@ export default async function LayoutSistema({ children }: LayoutProps<"/">) {
       </header>
 
       <div className="flex flex-1 flex-col">{children}</div>
+      <Recorridos vistos={vistos} />
 
       <footer className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 print:hidden">
         <CreditoGch />
