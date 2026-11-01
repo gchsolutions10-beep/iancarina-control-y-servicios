@@ -226,9 +226,11 @@ export default async function PeriodoPoliza({ params, searchParams }: PageProps<
           descripcion="Quién o qué está asegurado, desde y hasta cuándo, con la prima de cada cobertura y la regla que la calculó."
           accion={
             borrador && registrar ? (
-              <BotonAccion accion={calcularPrimas} ocultos={{ id_periodo: String(id) }} variante="primario">
-                <Calculator className="size-3.5" aria-hidden /> Calcular primas
-              </BotonAccion>
+              <span data-recorrido="calcular">
+                <BotonAccion accion={calcularPrimas} ocultos={{ id_periodo: String(id) }} variante="primario">
+                  <Calculator className="size-3.5" aria-hidden /> Calcular primas
+                </BotonAccion>
+              </span>
             ) : undefined
           }
         >

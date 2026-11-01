@@ -55,7 +55,12 @@ test("cada ancla apunta a algo que existe en las pantallas", () => {
       if (exacta?.startsWith("menu-")) continue; // se generan del nombre de cada pestaña
       if (exacta) assert.ok(codigo.includes(`data-recorrido="${exacta}"`), `${r.id}: falta data-recorrido="${exacta}"`);
       else if (seccion) assert.ok(titulosSeccion.some((t) => t.startsWith(seccion)), `${r.id}: no hay sección «${seccion}»`);
-      else assert.fail(`${r.id}: ancla con formato desconocido ${p.ancla}`);
+      else if (/\[name="([a-z_]+)"\]$/.test(p.ancla)) {
+        const campo = p.ancla.match(/name="([a-z_]+)"\]$/)![1];
+        assert.ok(codigo.includes(`nombre="${campo}"`) || codigo.includes(`name="${campo}"`), `${r.id}: no hay campo «${campo}»`);
+        const dentro = p.ancla.match(/^\[data-recorrido\^="seccion-([^"]+)"\]/)?.[1];
+        if (dentro) assert.ok(titulosSeccion.some((x) => x.startsWith(dentro)), `${r.id}: no hay sección «${dentro}»`);
+      } else if (p.ancla !== "main form button[type=submit]") assert.fail(`${r.id}: ancla con formato desconocido ${p.ancla}`);
     }
   }
 });

@@ -29,10 +29,10 @@ export function RecorridosManual() {
           })}
           className={claseBoton("secundario", "md")}
         >
-          <RotateCcw className="size-4" aria-hidden /> Volver a mostrar todos los recorridos
+          <RotateCcw className="size-4" aria-hidden /> Volver a mostrar los recorridos y los primeros pasos
         </button>
         <span aria-live="polite" className="text-sm text-exito">
-          {hecho && "Listo: cada recorrido se abrirá de nuevo al entrar a su pantalla."}
+          {hecho && "Listo: cada recorrido se abrirá de nuevo al entrar a su pantalla, y los primeros pasos vuelven a Inicio."}
         </span>
       </div>
     </section>

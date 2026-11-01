@@ -24,7 +24,7 @@ export default async function NuevaPoliza({ searchParams }: PageProps<"/polizas/
     return (
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6">
         <Encabezado volver={{ href: "/polizas/lista", etiqueta: "Pólizas" }} titulo="Nueva póliza" subtitulo="¿De qué empresa es la póliza?" />
-        <div className="flex flex-wrap gap-2">
+        <div data-recorrido="elegir-empresa" className="flex flex-wrap gap-2">
           {f.empresasRegistrar.map((e) => (
             <Link key={e.valor} href={`/polizas/nueva?empresa=${e.valor}`} className={claseBoton("secundario", "lg")}>
               {e.etiqueta}

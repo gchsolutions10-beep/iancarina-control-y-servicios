@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import { marcarRecorridoVisto } from "@/actions/recorridos";
 import { claseBoton } from "@/components/ui/boton";
-import { recorridoDe, type PasoRecorrido } from "@/lib/ayuda/recorridos";
+import { recorridosDe, type PasoRecorrido } from "@/lib/ayuda/recorridos";
 
 /** Evento para abrir el recorrido de la pantalla actual (lo dispara el botón del diálogo «i»). */
 export const EVENTO_INICIAR = "recorrido:iniciar";
@@ -18,13 +18,33 @@ type Caja = { top: number; left: number; width: number; height: number };
 const MARGEN = 8;
 const ANCHO_TARJETA = 360;
 
-/** Elemento visible de un paso (los ocultos o que el usuario no tiene no cuentan). */
-function elementoDe(paso: PasoRecorrido): HTMLElement | null {
-  if (!paso.ancla) return null;
-  const el = document.querySelector<HTMLElement>(paso.ancla);
-  if (!el) return null;
+const visible = (el: Element) => {
   const r = el.getBoundingClientRect();
-  return r.width > 0 && r.height > 0 ? el : null;
+  return r.width > 0 && r.height > 0;
+};
+const espera = (ms: number) => new Promise((resolver) => setTimeout(resolver, ms));
+
+/**
+ * Elemento que se resalta en un paso. Un campo de formulario se resalta con su etiqueta. Con `abrir`, un
+ * campo dentro de un formulario plegado (<details>) también cuenta: se despliega al mostrar el paso.
+ */
+function elementoDe(paso: PasoRecorrido, abrir = false): HTMLElement | null {
+  if (!paso.ancla) return null;
+  const candidatos = [...document.querySelectorAll<HTMLElement>(paso.ancla)];
+  const objetivoDe = (el: HTMLElement) => (el.matches("input, select, textarea") ? (el.closest<HTMLElement>("[data-campo], label") ?? el) : el);
+  // Primero uno que ya se ve; si no, uno dentro de un solo formulario plegado cuya parte de afuera se ve.
+  const visibleYa = candidatos.map(objetivoDe).find(visible);
+  if (visibleYa) return visibleYa;
+  for (const el of candidatos) {
+    const plegado = el.closest("details");
+    if (!plegado || plegado.open || !plegado.parentElement || !visible(plegado.parentElement)) continue;
+    if (!abrir) return objetivoDe(el); // existe: se mostrará al desplegarlo
+    plegado.open = true;
+    const objetivo = objetivoDe(el);
+    if (visible(objetivo)) return objetivo;
+    plegado.open = false;
+  }
+  return null;
 }
 
 /**
@@ -33,16 +53,48 @@ function elementoDe(paso: PasoRecorrido): HTMLElement | null {
  */
 export function Recorridos({ vistos }: { vistos: string[] }) {
   const ruta = usePathname();
+  // También al cambiar la consulta: «Nueva póliza» pasa de elegir la empresa al formulario en la misma ruta.
+  const consulta = useSearchParams().toString();
   const [vistosLocal, setVistosLocal] = useState(() => new Set(vistos));
   const [activo, setActivo] = useState<Activo | null>(null);
   const [indice, setIndice] = useState(0);
   const [caja, setCaja] = useState<Caja | null>(null);
   const [angosta, setAngosta] = useState(false);
   const tarjeta = useRef<HTMLDivElement>(null);
+  /** Cambia en cada pantalla: un recorrido que todavía espera a la página se cancela al salir. */
+  const turno = useRef(0);
+  /** Al salir de la pantalla, un recorrido que todavía espera a la página ya no se abre. */
+  const cancelarEspera = useCallback(() => {
+    turno.current++;
+  }, []);
+  /** Formularios plegados que abrió el recorrido (se vuelven a plegar al terminar). */
+  const abiertos = useRef<HTMLDetailsElement[]>([]);
 
   const iniciar = useCallback(
-    (forzar: boolean) => {
-      const r = recorridoDe(ruta);
+    async (forzar: boolean) => {
+      const candidatos = recorridosDe(ruta);
+      if (candidatos.length === 0) return;
+      const mio = ++turno.current;
+      // Espera a que la pantalla termine de cargar (en la nube puede tardar): hasta que aparezcan todas
+      // las partes, o hasta que su número deje de crecer durante 1,5 s (máximo 8 s).
+      const anclados = candidatos.flatMap((c) => [...c.pasos.filter((p) => p.ancla), ...(c.requiere ? [{ ancla: c.requiere, titulo: "", texto: "" }] : [])]);
+      let previo = -1;
+      let quieto = 0;
+      for (let t = 0; t < 8000 && anclados.length > 0; t += 250) {
+        const hay = anclados.filter((p) => elementoDe(p)).length;
+        if (hay === anclados.length) break;
+        if (hay === previo && hay > 0) {
+          quieto += 250;
+          if (quieto >= 1500) break;
+        } else {
+          quieto = 0;
+          previo = hay;
+        }
+        await espera(250);
+        if (turno.current !== mio) return;
+      }
+      if (turno.current !== mio) return;
+      const r = candidatos.find((c) => !c.requiere || document.querySelector(c.requiere));
       if (!r || (!forzar && vistosLocal.has(r.id))) return;
       // Solo los pasos que el usuario ve en esta pantalla (sin ancla = paso centrado).
       const pasos = r.pasos.filter((p) => !p.ancla || elementoDe(p));
@@ -59,14 +111,17 @@ export function Recorridos({ vistos }: { vistos: string[] }) {
     const params = new URLSearchParams(window.location.search);
     if (params.get("imprimir") === "1") return;
     const forzar = params.get("recorrido") === "1";
-    const t = setTimeout(() => iniciar(forzar), 700);
-    return () => clearTimeout(t);
+    const t = setTimeout(() => void iniciar(forzar), 400);
+    return () => {
+      clearTimeout(t);
+      cancelarEspera();
+    };
     // Solo al cambiar de pantalla; `iniciar` cambia también al marcar uno como visto.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ruta]);
+  }, [ruta, consulta]);
 
   useEffect(() => {
-    const abrir = () => iniciar(true);
+    const abrir = () => void iniciar(true);
     window.addEventListener(EVENTO_INICIAR, abrir);
     return () => window.removeEventListener(EVENTO_INICIAR, abrir);
   }, [iniciar]);
@@ -77,6 +132,8 @@ export function Recorridos({ vistos }: { vistos: string[] }) {
 
   const terminar = useCallback(() => {
     if (!activo) return;
+    for (const d of abiertos.current) d.open = false;
+    abiertos.current = [];
     setVistosLocal((v) => new Set(v).add(activo.id));
     setActivo(null);
     setCaja(null);
@@ -89,14 +146,24 @@ export function Recorridos({ vistos }: { vistos: string[] }) {
   // Medir el elemento resaltado (y volver a medir al desplazar o cambiar el tamaño de la ventana).
   useLayoutEffect(() => {
     if (!paso) return;
-    const el = elementoDe(paso);
-    if (el) {
-      const comportamiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+    const cerrados = [...document.querySelectorAll("details")].filter((d) => !d.open);
+    const el = elementoDe(paso, true);
+    const recienAbiertos = cerrados.filter((d) => d.open);
+    abiertos.current.push(...recienAbiertos);
+    // El desplazamiento va en el cuadro siguiente: un formulario recién desplegado ya tiene su tamaño final.
+    const desplazar = requestAnimationFrame(() => {
+      if (!el) return;
       const r = el.getBoundingClientRect();
+      // Saltos largos (de abajo de la página al título) se hacen sin animación: la tarjeta no «vuela».
+      const lejos = Math.abs(r.top - window.innerHeight / 2) > window.innerHeight * 1.5;
+      // Junto a un formulario recién desplegado el desplazamiento suave no siempre arranca: va directo.
+      const directo = lejos || recienAbiertos.length > 0 || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const comportamiento = directo ? "auto" : "smooth";
       // Lo alto (una lista larga) se muestra desde su comienzo, debajo de la barra fija del menú.
       if (r.height > window.innerHeight * 0.6) window.scrollTo({ top: r.top + window.scrollY - 140, behavior: comportamiento });
-      else el.scrollIntoView({ block: "center", behavior: comportamiento });
-    }
+      // Centrado con la ventana (scrollIntoView no desplaza cuando un contenedor intermedio tiene overflow).
+      else window.scrollTo({ top: r.top + window.scrollY - (window.innerHeight - r.height) / 2, behavior: comportamiento });
+    });
     let cuadro = 0;
     const medir = () => {
       cancelAnimationFrame(cuadro);
@@ -111,7 +178,14 @@ export function Recorridos({ vistos }: { vistos: string[] }) {
     medir();
     window.addEventListener("scroll", medir, true);
     window.addEventListener("resize", medir);
+    // Mientras la página se acomoda (un formulario que se despliega, un desplazamiento suave) se vuelve
+    // a medir unas veces más, para que la tarjeta quede junto a su elemento.
+    const repetir = setInterval(medir, 120);
+    const fin = setTimeout(() => clearInterval(repetir), 1500);
     return () => {
+      cancelAnimationFrame(desplazar);
+      clearInterval(repetir);
+      clearTimeout(fin);
       cancelAnimationFrame(cuadro);
       window.removeEventListener("scroll", medir, true);
       window.removeEventListener("resize", medir);
@@ -119,7 +193,8 @@ export function Recorridos({ vistos }: { vistos: string[] }) {
   }, [paso]);
 
   useEffect(() => {
-    if (activo) tarjeta.current?.focus();
+    // Sin desplazar: enfocar con desplazamiento cortaría el desplazamiento suave hacia el elemento.
+    if (activo) tarjeta.current?.focus({ preventScroll: true });
   }, [activo, indice]);
 
   useEffect(() => {
@@ -139,8 +214,13 @@ export function Recorridos({ vistos }: { vistos: string[] }) {
   const vh = typeof window === "undefined" ? 800 : window.innerHeight;
   const vw = typeof window === "undefined" ? 1200 : window.innerWidth;
   let posicion: React.CSSProperties;
-  if (angosta || !caja) {
-    posicion = caja || angosta ? { left: 16, right: 16, bottom: 16 } : { left: "50%", top: "50%", transform: "translate(-50%, -50%)", width: `min(${ANCHO_TARJETA + 80}px, calc(100vw - 32px))` };
+  // Si el elemento todavía está fuera de la vista (se está desplazando), la tarjeta espera en una esquina.
+  const fuera = caja !== null && (caja.top > vh - 40 || caja.top + caja.height < 40);
+  if (fuera) {
+    posicion = { bottom: 16, right: 16, width: `min(${ANCHO_TARJETA}px, calc(100vw - 32px))` };
+  } else if (angosta || !caja) {
+    // Centrada sin `transform` (la animación de entrada usa transform y lo pisaría).
+    posicion = caja || angosta ? { left: 16, right: 16, bottom: 16 } : { left: 16, right: 16, top: "calc(50% - 130px)", marginInline: "auto", maxWidth: ANCHO_TARJETA + 80 };
   } else {
     const left = Math.min(Math.max(16, caja.left), vw - ANCHO_TARJETA - 16);
     const abajo = caja.top + caja.height + 12;

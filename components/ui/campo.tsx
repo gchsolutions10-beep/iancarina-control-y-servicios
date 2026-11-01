@@ -22,7 +22,7 @@ export function Campo({ etiqueta, error, ayuda, className, children }: CampoProp
   const id = useId();
   const idDetalle = `${id}-detalle`;
   return (
-    <div className={cn("flex min-w-0 flex-col gap-1.5", className)}>
+    <div data-campo className={cn("flex min-w-0 flex-col gap-1.5", className)}>
       <label htmlFor={id} className="text-sm font-medium text-tinta">
         {etiqueta}
       </label>
