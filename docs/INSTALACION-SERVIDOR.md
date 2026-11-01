@@ -20,6 +20,9 @@ un apéndice para Linux.
 
 ---
 
+> Requisitos del servidor para el área de TI (equipo, programas, red, respaldos y lista de chequeo):
+> `docs/REQUISITOS-SERVIDOR.md`.
+
 ## Antes de empezar: qué necesita
 
 - Un computador que quede encendido siempre, en la red de la empresa. Mínimo 4 GB de RAM y 20 GB libres.
