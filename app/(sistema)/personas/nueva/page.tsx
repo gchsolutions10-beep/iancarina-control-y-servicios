@@ -28,7 +28,7 @@ export default async function NuevaParte({ searchParams }: PageProps<"/personas/
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6">
       <Encabezado volver={{ href: "/personas/fichas", etiqueta: "Personas" }} titulo="Nueva ficha" />
-      <nav className="mb-4 flex gap-2" aria-label="Tipo de ficha">
+      <nav data-recorrido="tipo-ficha" className="mb-4 flex gap-2" aria-label="Tipo de ficha">
         {pestana("natural", "Persona natural")}
         {pestana("juridica", "Empresa / organización")}
       </nav>

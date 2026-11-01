@@ -10,7 +10,7 @@ import { db } from "@/lib/db";
  */
 export async function marcarRecorridoVisto(id: string): Promise<void> {
   const u = await requerirSesion();
-  if (!RECORRIDOS.some((r) => r.id === id)) return;
+  if (id !== "primeros-pasos" && !RECORRIDOS.some((r) => r.id === id)) return;
   await db.app_recorridos_vistos.upsert({
     where: { id_usuario_recorrido: { id_usuario: u.id, recorrido: id } },
     create: { id_usuario: u.id, recorrido: id },

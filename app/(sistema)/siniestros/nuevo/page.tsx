@@ -27,7 +27,7 @@ export default async function NuevoSiniestro({ searchParams }: PageProps<"/sinie
     return (
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6">
         <Encabezado volver={volver} titulo="Nuevo expediente" subtitulo="¿De qué empresa es el siniestro?" />
-        <div className="flex flex-wrap gap-2">
+        <div data-recorrido="elegir-empresa" className="flex flex-wrap gap-2">
           {f.empresasRegistrar.map((e) => (
             <Link key={e.valor} href={`/siniestros/nuevo?empresa=${e.valor}${params.sujeto === "transporte" ? "&sujeto=transporte" : ""}`} className={claseBoton("secundario", "lg")}>
               {e.etiqueta}
@@ -44,7 +44,7 @@ export default async function NuevoSiniestro({ searchParams }: PageProps<"/sinie
     return (
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6">
         <Encabezado volver={volver} titulo="Nuevo expediente" subtitulo={`${f.nombreEmpresa(empresa)} · ¿Qué tipo de siniestro es?`} />
-        <ul className="grid gap-3 sm:grid-cols-2">
+        <ul data-recorrido="elegir-tipo" className="grid gap-3 sm:grid-cols-2">
           {tipos.map((t) => (
             <li key={t.id}>
               <Link href={enlace({ tipo: String(t.id) })} className="block rounded-xl border border-borde bg-superficie px-4 py-3 shadow-xs transition-colors hover:bg-superficie-2">

@@ -100,7 +100,10 @@ del sistema (login, usuarios, ajustes, componentes) se copió de ahí y ya no se
       (`docs/modulos/reportes.md`)
 - [x] Etapa 6: despliegue dual: demo en Vercel + Neon (`docs/DESPLIEGUE.md`) y servidor de la empresa con
       `.env.servidor.example`, `npm run instalar` / `npm run verificar`, PM2 y respaldos
-      (`docs/INSTALACION-SERVIDOR.md`)
+      (`docs/INSTALACION-SERVIDOR.md`; requisitos para TI en `docs/REQUISITOS-SERVIDOR.md`)
+- [x] Ayuda guiada: recorrido por pantalla con campos de los formularios y «Primeros pasos» en Inicio
+      (`lib/ayuda/recorridos.ts`, `lib/ayuda/primeros-pasos.ts`)
+- [ ] Presupuestos (área propia con su permiso): definir con el cliente antes de construir
 
 ## Flujo de publicación
 

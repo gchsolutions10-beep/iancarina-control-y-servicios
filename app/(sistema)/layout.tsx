@@ -15,6 +15,7 @@ import { opcionesConfiguracion } from "@/lib/configuracion";
 import { empresasDe } from "@/lib/fichas/acceso";
 import { COOKIE_TEMA, leerTema } from "@/lib/tema";
 import { cookies } from "next/headers";
+import { Suspense } from "react";
 
 export default async function LayoutSistema({ children }: LayoutProps<"/">) {
   const usuario = await requerirSesion();
@@ -71,7 +72,9 @@ export default async function LayoutSistema({ children }: LayoutProps<"/">) {
       </header>
 
       <div className="flex flex-1 flex-col">{children}</div>
-      <Recorridos vistos={vistos} />
+      <Suspense fallback={null}>
+        <Recorridos vistos={vistos} />
+      </Suspense>
 
       <footer className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 print:hidden">
         <CreditoGch />

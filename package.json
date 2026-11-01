@@ -29,14 +29,14 @@
     "geist": "^1.7.2",
     "jose": "^6.2.12",
     "lucide-react": "^1.52.0",
-    "next": "16.4.0",
+    "next": "^16.4.3",
     "pg": "^8.23.1",
     "prisma": "^7.10.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "recharts": "^3.10.1",
     "server-only": "^0.0.1",
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
@@ -46,9 +46,14 @@
     "@types/react-dom": "^19",
     "dotenv": "^18.0.5",
     "eslint": "^9",
-    "eslint-config-next": "16.4.0",
+    "eslint-config-next": "^16.4.3",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5"
+  },
+  "overrides": {
+    "@vercel/cli-config": {
+      "zod": "$zod"
+    }
   }
 }
